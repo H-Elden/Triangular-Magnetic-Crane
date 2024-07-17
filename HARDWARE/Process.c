@@ -73,7 +73,7 @@ int way;
 void BLine() {
     puts("");
 	puts("----- B Line -----");
-    SetGoaldis(0, 0, 24);
+    SetGoaldis(0, 0, 22);
     isStore = 'B';					//存储砝码信息
     isStop = 0;
     SensorON(0);
@@ -104,10 +104,8 @@ void CLine() {
 	puts("C1 OFF All");
     if(isStop == 1)
     {
-    if(obj[1] || obj[2])
-        {
+        puts("-----WAY == 1-----");
         	while (MotorState != Stop);	//阻塞等待 车子停稳
-            puts("Stepper");
             obj[1] ? Stepper_Turn(3, DOWN3, C1) : Stepper_Turn(1, WAI1, S1);			//步进3向下抓取  或  步进1向外
             obj[2] ? Stepper_Turn(4, DOWN4, C1) : Stepper_Turn(2, WAI2, S1);			//步进4向下抓取  或  步进2向外
             Stepper_Turn(0, DOWN0, Z0);
@@ -116,15 +114,15 @@ void CLine() {
             delay_ms(50);
             if (obj[1])		MagnetON(1);								//开启电磁铁1
             if (obj[2])		MagnetON(2);								//开启电磁铁2
-            MagnetON(0);
+            MagnetON(0);//开启电磁铁0
             
             delay_ms(50);
             if (obj[1])	Stepper_Turn(3, UP3, C2);				//步进3向上提取
             if (obj[2])	Stepper_Turn(4, UP4, C2);				//步进4向上提取
+            Stepper_Turn(0, UP0, Z0);//步进0向上
             delay_ms(50);
             if (obj[1])	Stepper_Turn(1, WAI1, S2);   		//步进1向外
             if (obj[2])	Stepper_Turn(2, WAI2, S2);   //步进2向外
-            Stepper_Turn(0, UP0, Z0);
             
             if (obj[1] && obj[2]) {
                 Run(0, 375, MVEL);
@@ -135,11 +133,12 @@ void CLine() {
                 Run(0, 187.5, MVEL);
                 Cyline();
             }
-        }
     }
 }
 
 void Cyline() {
+    puts("");
+	puts("----- Cy Line -----");
     
     while (MotorState != Stop);	//阻塞等待 车子停稳
     
@@ -169,11 +168,12 @@ void Cyline() {
 }
 
 void ELine1() {
+    puts("-----WAY == 0-----");
 	puts("");
-	puts("----- E Line -----");
+	puts("----- E1 Line -----");
 	SetGoaldis(1, 2, 4);
-	SetGoaldis(2, 2, 4);			//测量修正：7.4-16:36
-    SetGoaldis(0, 0, 21);
+	SetGoaldis(2, 2, 4);
+    SetGoaldis(0, 0, 22);
 	isStore = 'E';				//存储砝码信息
 	isStop = 1;						//测到物品就停车
 	Con_Dis = 1387.5;
@@ -182,18 +182,17 @@ void ELine1() {
 	SensorON(1);
 	SensorON(2);
     SensorON(0);
-	puts("E ON 1 2");
+	puts("E1 ON 1 2");
 	//阻塞等待直到 已经停车 或者 已经走过E线
 	while (MotorState == Velocity_Xunji && Run_Dis < PointDis[2][2]);
-	delay_ms(100);
+	delay_ms(50);
 	Sensor_open = 0;	//关闭所有传感器
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
-	puts("E OFF All");
+	puts("E1 OFF All");
 	dist[0] = dist[1] = dist[2] = 0;
 	if (obj[3] || obj[4]) {
 		while (MotorState != Stop);	//阻塞等待 车子停稳
-		puts("Stepper");
 		obj[3] ? Stepper_Turn(3, DOWN3, C1) : Stepper_Turn(1, WAI1, S1);			//步进3向下抓取  或  步进1向外
 		obj[4] ? Stepper_Turn(4, DOWN4, C1) : Stepper_Turn(2, WAI2, S1);			//步进4向下抓取  或  步进2向外
 
@@ -205,13 +204,12 @@ void ELine1() {
 
 		if (obj[3])	Stepper_Turn(3, UP3, C2);				//步进3向上提取
 		if (obj[4])	Stepper_Turn(4, UP4, C2);				//步进4向上提取
-		delay_ms(1000);
+		delay_ms(50);
 		if (obj[3])	Stepper_Turn(1, WAI1, S2);   		//步进1向外
 		if (obj[4])	Stepper_Turn(2, WAI2, S2);   //步进2向外
 
 		if (obj[3] && obj[4]) {
 			Motor_Run(0, MVEL);
-			puts("E Motor_Run");
 		} else {
 			Run(0, 200, MVEL);											//正向行进200mm
 			FLine1();
@@ -225,40 +223,43 @@ void ELine1() {
 }
 
 void ELine21() {
+    puts("");
+	puts("----- E21 Line -----");
     SetGoaldis(1, 2, 4);
-	SetGoaldis(2, 2, 4);			//测量修正：7.4-16:36
+	SetGoaldis(2, 2, 4);
     isStore = 'E';				//存储砝码信息
-	isStop = 0;						//测到物品就停车
+	isStop = 0;						//不停车
 	Con_Dis = 0;
 	LED_GREEN = 1;		//开左传感器关绿灯
 	LED_RED = 1;			//开右传感器关红灯
 	SensorON(1);
 	SensorON(2);
-	puts("E2 ON 1 2");
+	puts("E21 ON 1 2");
     while(Run_Dis < PointDis[2][2]);
     delay_ms(100);
 	Sensor_open = 0;	//关闭所有传感器
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
-	puts("E2 OFF All");
+	puts("E21 OFF All");
 	dist[1] = dist[2] = 0;
 }
 
 void ELine22() {
-    
+    puts("");
+	puts("----- E22 Line -----");
     Stepper_Turn(1, NEI1, S2);
     Stepper_Turn(2, NEI2, S2);
     delay_ms(50);
     Stepper_Turn(3, DOWN3, C2);
     Stepper_Turn(4, DOWN4, C2);
-    while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
-	while (StartStepper[1] || StartStepper[2]);				//等待步进电机横向移动完毕
+    while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
+	while (StartStepper[1] || StartStepper[2]);				
     
     while(MotorState != Stop);
     
     Stepper_Turn(3, DOWN3, C1);
     Stepper_Turn(4, DOWN4, C1);
-    while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
+    while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
     delay_ms(50);
     MagnetON(1);
     MagnetON(2);
@@ -272,10 +273,12 @@ void ELine22() {
     
 }
 void ELine221() {
+    puts("");
+	puts("----- E221 Line -----");
     while(MotorState != Stop);
     if(obj[3])     Stepper_Turn(3, DOWN3, C1);
     if(obj[4])     Stepper_Turn(4, DOWN4, C1);
-    while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
+    while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
     if(obj[3])      MagnetON(1);
     if(obj[4])      MagnetON(2);
     delay_ms(50);
@@ -292,7 +295,7 @@ void ELine221() {
 
 void FLine1() {
 	puts("");
-	puts("----- F Line -----");
+	puts("----- F1 Line -----");
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 
     if (!obj[3])	while (StartStepper[1]);			//等待步进电机1横向移动完毕
@@ -315,26 +318,25 @@ void FLine1() {
     if (!obj[3])	Stepper_Turn(3, UP3, C2);				//步进3向上提取
     if (!obj[4])	Stepper_Turn(4, UP4, C2);				//步进4向上提取
     if ( obj[5])    Stepper_Turn(0, UP0, Z0);         //步进0向上提取
-    delay_ms(1000);
+    delay_ms(50);
     if (!obj[3])	Stepper_Turn(1, WAI1, S2 - S1);   		//步进1向外
     if (!obj[4])	Stepper_Turn(2, WAI2, S2 - S1);   //步进2向外
-    delay_ms(1000);
 
 
 	Motor_Run(0, MVEL);
-	puts("F Motor_Run");
 }
 
 void FLine2() {
-    
-    obj[3] ? Stepper_Turn(1, NEI1, S2) : Stepper_Turn(1, NEI1, S2 - S1);			//步进3向下抓取  或  步进1向外
-	obj[4] ? Stepper_Turn(2, NEI2, S2) : Stepper_Turn(2, NEI2, S2 - S1);			//步进4向下抓取  或  步进2向外
+    puts("");
+	puts("----- F2 Line -----");
+    obj[3] ? Stepper_Turn(1, NEI1, S2) : Stepper_Turn(1, NEI1, S2 - S1);			//步进向内移动
+	obj[4] ? Stepper_Turn(2, NEI2, S2) : Stepper_Turn(2, NEI2, S2 - S1);			
     delay_ms(50);
     Stepper_Turn(3, DOWN3, C2);
     Stepper_Turn(4, DOWN4, C2);
     
-    while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
-	while (StartStepper[1] || StartStepper[2]);				//等待步进电机横向移动完毕
+    while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
+	while (StartStepper[1] || StartStepper[2]);				
     
     while(MotorState != Stop);
     
@@ -342,7 +344,7 @@ void FLine2() {
             Stepper_Turn(3, DOWN3, C1);
     if(!obj[4])
             Stepper_Turn(4, DOWN4, C1);
-    while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
+    while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
     if(!obj[3])
         MagnetON(1);
     if(!obj[4])
@@ -367,10 +369,10 @@ void FLine2() {
 
 void HLine1() {
 	puts("");
-	puts("----- H Line -----");
+	puts("----- H1 Line -----");
 	LED_GREEN = 1;		//开左传感器关绿灯
-	puts("H ON 1");
-	isStore = 'F';
+	puts("H1 ON 1");
+	isStore = 0;//不需要存储信息
 	isStop = 1;
 	Con_Dis = 2205;
 	SetGoaldis(1, 45, 55);
@@ -380,11 +382,11 @@ void HLine1() {
 	Sensor_open = 0;
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
-	puts("H Close All");
+	puts("H1 Close All");
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 	Run_Dis = 0;
-	while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
-	while (StartStepper[1] || StartStepper[2]);				//等待步进电机横向移动完毕
+	while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
+	while (StartStepper[1] || StartStepper[2]);				
 
 	delay_ms(50);
 	MagnetOFF(1);								//关闭电磁铁1
@@ -395,7 +397,12 @@ void HLine1() {
 	Stepper_Turn(4, UP4, C1);			//步进4向上提举，脱离砝码
 	while (StartStepper[3] || StartStepper[4]);		//等待步进电机向上移动完毕
 	
-    /////
+    obj[1] ? Stepper_Turn(1,NEI1,S2 - S1) : Stepper_Turn(1,NEI1,S2);					//步进1向内到达正确位置
+	obj[2] ? Stepper_Turn(2,NEI2,S2 - S1) : Stepper_Turn(2,NEI2,S2);					//步进2向内到达正确位置
+    delay_ms(50);
+	Stepper_Turn(3,DOWN3,C2);				//步进3向下预先放到抓取高度
+	Stepper_Turn(4,DOWN4,C2);				//步进4向下预先放到抓取高度
+    
     if (obj[5])
     {
 		Run(1,1005, MVEL);
@@ -406,21 +413,14 @@ void HLine1() {
 		Run(1, 255, MVEL);
         GLine1();
     }
-	puts("H Motor_Run");
-	delay_ms(500);
-	Stepper_Turn(3,DOWN3,C2);				//步进3向下预先放到抓取高度
-	Stepper_Turn(4,DOWN4,C2);				//步进4向下预先放到抓取高度
-	obj[1] ? Stepper_Turn(1,NEI1,S2 - S1) : Stepper_Turn(1,NEI1,S2);					//步进1向内到达正确位置
-	obj[2] ? Stepper_Turn(2,NEI2,S2 - S1) : Stepper_Turn(2,NEI2,S2);					//步进2向内到达正确位置
 }
 
 void HLine2() {
-    
     puts("");
 	puts("----- H2 Line -----");
 	LED_GREEN = 1;		//开左传感器关绿灯
-	puts("H ON 1");
-	isStore = 'F';
+	puts("H2 ON 1");
+	isStore = 0;//不需要存储信息
 	isStop = 1;
 	Con_Dis = 2205;
 	SetGoaldis(1, 45, 55);
@@ -430,11 +430,11 @@ void HLine2() {
 	Sensor_open = 0;
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
-	puts("H Close All");
+	puts("H2 Close All");
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 	Run_Dis = 0;
-	while (StartStepper[3] || StartStepper[4]);				//等待步进电机横向移动完毕
-	while (StartStepper[1] || StartStepper[2]);				//等待步进电机横向移动完毕
+	while (StartStepper[3] || StartStepper[4]);				//等待步进电机移动完毕
+	while (StartStepper[1] || StartStepper[2]);				
 
 	delay_ms(50);
 	MagnetOFF(1);								//关闭电磁铁1
@@ -459,9 +459,7 @@ void HLine2() {
 
 void GLine1() {
 	puts("");
-	puts("----- G Line -----");
-	/////
-    puts("Stepper");
+	puts("----- G1 Line -----");
     while (MotorState != Stop);
 	Stepper_Turn(0,DOWN0,Z0);					//步进0向下抓取
 	while(StartStepper[0]);					//等待步进电机向下移动完毕
@@ -470,25 +468,21 @@ void GLine1() {
 	delay_ms(50);
 
 	Stepper_Turn(0,UP0,Z0);					//步进0向上提举到一定高度
-	//while(StartStepper[0]);					//等待步进电机向上移动完毕
     delay_ms(50);
 	Run(1, 750, MVEL);
-	puts("G Motor_Run");
     DPoint1();
 }
 
 void DPoint1() {
 	puts("");
-	puts("----- D Point -----");
+	puts("----- D1 Point -----");
     while (MotorState != Stop);
 	delay_ms(50);
 	MagnetOFF(0);								//关闭电磁铁0
 	delay_ms(50);
-    puts("Stepper");
 	Stepper_Turn(0,UP0,C1);					//步进0向上提举到一定高度
 	while(StartStepper[0]);					//等待步进电机向上移动完毕
 
-	puts("D Motor_Run");
 	if (!obj[1] || !obj[2]) {
 		Run(1, 188, MVEL);
 		while (MotorState != Stop);
@@ -501,12 +495,12 @@ void DPoint1() {
 }
 
 void DPoint2() {
-    
+    puts("");
+	puts("----- D2 Point -----");
     while (MotorState != Stop);	//阻塞等待 车子停稳
 	delay_ms(50);
 	MagnetOFF(0);								//关闭电磁铁0
 	delay_ms(50);
-    puts("Stepper");
 	Stepper_Turn(0,UP0,C1);					//步进0向上提举到一定高度
 	while(StartStepper[0]);					//等待步进电机向上移动完毕
     Motor_Run(0,MVEL);
@@ -514,9 +508,8 @@ void DPoint2() {
 
 void CLine1() {
 	puts("");
-	puts("----- C Line -----");
+	puts("----- C1 Line -----");
 
-    puts("Stepper");
     if(!obj[1]) Stepper_Turn(3, DOWN3, C1);			//步进3向下抓取 
     if(!obj[2]) Stepper_Turn(4, DOWN4, C1);			//步进4向下抓取 
 
@@ -532,7 +525,6 @@ void CLine1() {
     if (!obj[1])	Stepper_Turn(1, WAI1, S2);   		//步进1向外
     if (!obj[2])	Stepper_Turn(2, WAI2, S2);   //步进2向外
 
-	puts("C Motor_Run");
 	if (!obj[1] && !obj[2])
 		Motor_Run(1, MVEL);
 	else {
@@ -544,7 +536,7 @@ void CLine1() {
 
 void BLine1() {
 	puts("");
-	puts("----- B Line -----");
+	puts("----- B1 Line -----");
 
 	
 	if(obj[1])	Stepper_Turn(3,DOWN3,C1);				//步进3向下抓取
@@ -584,7 +576,7 @@ void ILine() {
 	while (MotorState != Stop);	//阻塞等待 车子停稳
     while(StartStepper[1]||StartStepper[2]);		//等待步进电机移动完毕
     while(StartStepper[3]||StartStepper[4]);		
-	puts("Stepper");
+    
 	delay_ms(50);
 	MagnetOFF(1);								//关闭电磁铁1
 	MagnetOFF(2);								//关闭电磁铁2

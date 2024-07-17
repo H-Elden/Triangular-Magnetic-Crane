@@ -184,7 +184,6 @@ void EXTI_Sensor(uint8_t i)
             else if(isStore == 'B')
             {
                 obj[0] = 1;
-                printf("7777\r\n");
             }
 			else if(isStore == 'E' && i == 0){
 				obj[5] = 1;

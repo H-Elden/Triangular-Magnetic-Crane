@@ -34,7 +34,6 @@ int main()
 			CLine();
             if(isStop){
                 way = 1;
-                printf("%d",6666);
             }
             else
                 way = 0;
