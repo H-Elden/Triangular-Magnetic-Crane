@@ -5,7 +5,7 @@
 		使用定时器：TIM7：计数器；TIM6：每10ms产生一次中断，进行一次测距
 		超声波传感器：使用5V电源
 		引脚配置：	
-				超声波0：(中间向内测)
+				超声波0：(前轮向内测)
 							PG0    ------> Echo0
 							PG1    ------> Trig0
 				超声波1：（左前轮）
@@ -26,6 +26,7 @@
 #include "delay.h"
 #include "motorencoder.h" 
 #include "led.h"
+#include "Process.h"
 
 /* ----- 引脚定义 ----- */
 #define Echo0_Pin GPIO_Pin_0
@@ -55,7 +56,7 @@ typedef struct {
     uint64_t low;  // 低64位
 } uint128_t;
 
-#define CYCLES 10			//循环次数，即统计近多少次的超声波数据，范围[0,128)
+#define CYCLES 15			//循环次数，即统计近多少次的超声波数据，范围[0,128)
 
 extern uint8_t Sensor_open;
 extern uint128_t ones[4];

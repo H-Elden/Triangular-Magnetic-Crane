@@ -26,7 +26,6 @@ void Init() {
 	AutoScanSensor();//自动搜索传感器，如果线没有插对或者使用的串口工具不对会搜索不到传感器
     WitSetOutputRate(RRATE_10HZ);//回传速率设置为10赫兹
     WitSetUartBaud(WIT_BAUD_115200);//波特率设置为115200
-    //WitStartIYAWCali();  陀螺仪z轴置零函数（偶尔用一次）
 	delay_ms(1000);//延迟等待初始化完成
 	Gyro_read();
 	ZhongZhi = fAngle[2];
@@ -36,7 +35,7 @@ void Init() {
 	printf("ZhongZhi = %.3f\r\n", ZhongZhi);
     n_Fudu = 1;
 	
-    way = 0;
+    way = 0;                             //默认way = 0
 	PointDis_Init();						//点位距离初始化
 	TIM6_Init(); 								//10ms 读取一次编码器(即100Hz)，使用定时器6
 	TIM7_Init();								//用于超声波计数 7
@@ -79,7 +78,7 @@ int way;
 void BLine() {
     puts("");
 	puts("----- B Line -----");
-    SetGoaldis(0, 14, 23);
+    SetGoaldis(0, 14, 30);
     isStore = 'B';					//存储砝码信息
     isStop = 0;
     SensorON(0);
@@ -102,23 +101,30 @@ void CLine() {
 	SensorON(1);
 	SensorON(2);
 	while (Sensor_open && Run_Dis < PointDis[1][2]);
-    if(!obj[1] && !obj[2])
-        isStop = 0;
 	Sensor_open = 0;				//关闭所有传感器
 	dist[1] = dist[2] = 0;
 	delay_ms(100);
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
 	puts("C OFF All");
-    if(isStop != 0)
+    if(way == 1)
     {
         puts("-----WAY == 1-----");
         	while (MotorState != Stop);	//阻塞等待 车子停稳
-            obj[1] ? /*Stepper_Turn(3, DOWN3, C1)*/ 1: Stepper_Turn(1, WAI1, S1);			//步进3向下抓取  或  步进1向外
-            obj[2] ? Stepper_Turn(4, DOWN4, C1) : Stepper_Turn(2, WAI2, S1);			//步进4向下抓取  或  步进2向外
+        if(obj[1])
+            Stepper_Turn(1, WAI1, S1);
+        if(obj[2])
+            Stepper_Turn(2, WAI2, S1);
+        
             Stepper_Turn(5, DOWN0, Z0);
             
-            while (/*Stepper_GetStatus(3)*/ Stepper_GetStatus(4) || Stepper_GetStatus(5));	//等待步进电机向下移动完毕
+            while (Stepper_GetStatus(1) || Stepper_GetStatus(2));	//等待步进电机向下移动完毕
+        if(obj[1])
+            /*Stepper_Turn(3, DOWN3, C1)*/1;
+        if(obj[2])
+            Stepper_Turn(4, DOWN4, C1);
+        
+        while (/*Stepper_GetStatus(3) ||*/ Stepper_GetStatus(4) || Stepper_GetStatus(5));	//等待步进电机向下移动完毕
             delay_ms(50);
             if (obj[1])		MagnetON(1);								//开启电磁铁1
             if (obj[2])		MagnetON(2);								//开启电磁铁2
@@ -129,8 +135,8 @@ void CLine() {
             if (obj[2])	Stepper_Turn(4, UP4, C2);				//步进4向上提取
             Stepper_Turn(5, UP0, Z0);//步进0向上
             delay_ms(50);
-            if (obj[1])	Stepper_Turn(1, WAI1, S2);   		//步进1向外
-            if (obj[2])	Stepper_Turn(2, WAI2, S2);   //步进2向外
+            if (obj[1])	Stepper_Turn(1, WAI1, S2 - S1);   		//步进1向外
+            if (obj[2])	Stepper_Turn(2, WAI2, S2 - S1);   //步进2向外
             
             if (obj[1] && obj[2]) {
                 Run(0, 375, MVEL);
@@ -149,10 +155,6 @@ void Cyline() {
 	puts("----- Cy Line -----");
     
     while (MotorState != Stop);	//阻塞等待 车子停稳
-    
-    if (!obj[1])	while (Stepper_GetStatus(1));			//等待步进电机1横向移动完毕
-	if (!obj[2])	while (Stepper_GetStatus(2));			//等待步进电机2横向移动完毕
-    
 //    if (!obj[1])	Stepper_Turn(3, DOWN3, C1);			//步进3向下抓取
 	if (!obj[2])	Stepper_Turn(4, DOWN4, C1);			//步进4向下抓取
     
@@ -167,8 +169,8 @@ void Cyline() {
 //    if (!obj[1])	Stepper_Turn(3, UP3, C2);				//步进3向上提取
     if (!obj[2])	Stepper_Turn(4, UP4, C2);				//步进4向上提取
     delay_ms(50);
-    if (!obj[1])	Stepper_Turn(1, WAI1, S2 - S1);   		//步进1向外
-    if (!obj[2])	Stepper_Turn(2, WAI2, S2 - S1);   //步进2向外
+    if (!obj[1])	Stepper_Turn(1, WAI1, S2);   		//步进1向外
+    if (!obj[2])	Stepper_Turn(2, WAI2, S2);   //步进2向外
 
 
 	Run(0, 187.5, MVEL);
@@ -181,7 +183,6 @@ void ELine1() {
 	puts("----- E1 Line -----");
 	SetGoaldis(1, 0, 6);
 	SetGoaldis(2, 0, 6);
-//    SetGoaldis(0, 0, 22);
 	isStore = 'E';				//存储砝码信息
 	isStop = 1;						//测到物品就停车
 	Con_Dis = 1387.5;
@@ -189,12 +190,11 @@ void ELine1() {
 	LED_RED = 1;			//开右传感器关红灯
 	SensorON(1);
 	SensorON(2);
-//    SensorON(0);
 	puts("E1 ON 1 2");
 	//阻塞等待直到 已经停车 或者 已经走过E线
 	while (MotorState == Velocity_Xunji && Run_Dis < PointDis[2][2]);
     Sensor_open = 0;	//关闭所有传感器
-    SetGoaldis(0, 14, 23);
+    SetGoaldis(0, 14, 30);
     isStop = 0;
     SensorON(0);
     if(!obj[3] && !obj[4])
@@ -248,7 +248,6 @@ void ELine21() {
 	SensorON(2);
 	puts("E21 ON 1 2");
     while(Run_Dis < PointDis[2][2]);
-    delay_ms(100);
 	Sensor_open = 0;	//关闭所有传感器
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
@@ -261,7 +260,7 @@ void ELine22() {
 	puts("----- E22 Line -----");
     Stepper_Turn(1, NEI1, S2);
     Stepper_Turn(2, NEI2, S2);
-    delay_ms(50);
+    delay_ms(200);
 //    Stepper_Turn(3, DOWN3, C2);
     Stepper_Turn(4, DOWN4, C2);
     while ( Stepper_GetStatus(4));				//等待步进电机移动完毕
@@ -309,7 +308,7 @@ void FLine1() {
 	puts("");
 	puts("----- F1 Line -----");
     while(Run_Dis <= 1378.5);
-    Sensor_open = 0;//关闭0号超声波
+    SensorOFF(0);//关闭0号超声波
     dist[0] = 0;
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 
@@ -346,7 +345,7 @@ void FLine2() {
 	puts("----- F2 Line -----");
     obj[3] ? Stepper_Turn(1, NEI1, S2) : Stepper_Turn(1, NEI1, S2 - S1);			//步进向内移动
 	obj[4] ? Stepper_Turn(2, NEI2, S2) : Stepper_Turn(2, NEI2, S2 - S1);			
-    delay_ms(50);
+    delay_ms(200);
 //    Stepper_Turn(3, DOWN3, C2);
     Stepper_Turn(4, DOWN4, C2);
     
@@ -383,9 +382,6 @@ void FLine2() {
 }
 
 void HLine1() {
-    while(Run_Dis <= 1378.5);
-    Sensor_open = 0;//关闭0号超声波
-    dist[0] = 0;
 	puts("");
 	puts("----- H1 Line -----");
 	LED_GREEN = 1;		//开左传感器关绿灯
@@ -417,7 +413,7 @@ void HLine1() {
 	
     obj[1] ? Stepper_Turn(1,NEI1,S2 - S1) : Stepper_Turn(1,NEI1,S2);					//步进1向内到达正确位置
 	obj[2] ? Stepper_Turn(2,NEI2,S2 - S1) : Stepper_Turn(2,NEI2,S2);					//步进2向内到达正确位置
-    delay_ms(50);
+    delay_ms(200);
 //	Stepper_Turn(3,DOWN3,C2);				//步进3向下预先放到抓取高度
 	Stepper_Turn(4,DOWN4,C2);				//步进4向下预先放到抓取高度
     

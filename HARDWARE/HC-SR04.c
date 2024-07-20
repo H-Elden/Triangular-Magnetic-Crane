@@ -160,7 +160,7 @@ void EXTI_Sensor(uint8_t i)
 		else
 			dist[i] = 0.0001 * cnt * 340 / 2 ;	//单位cm
 		printf("dis %d = %.3f\r\n", i, dist[i]);
-		if(countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) > 3)				//近80次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)超过50次 就 停车
+		if(countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3)				//近80次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)超过50次 就 停车
 		{
 			//关闭传感器 + 置零测距值
 			SensorOFF(i);
@@ -176,10 +176,15 @@ void EXTI_Sensor(uint8_t i)
 			if(isStore == 'C')
             {
 				obj[i] = 1;
-                if(obj[0])
+                if(obj[0]){
                     isStop = 0;
+                    way = 0;
+                }
                 else
+                {
                     isStop = 1;
+                    way = 1;
+                }
             }
 			else if(isStore == 'E' && i!= 0)
 				obj[i+2] = 1;

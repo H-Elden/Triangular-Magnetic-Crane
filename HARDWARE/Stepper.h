@@ -25,7 +25,7 @@
 #define S2 2080
 #define C1 500
 #define C2 1000
-#define Z0 675
+#define Z0 600
 
 typedef enum {
 	S_VER   = 0,			/* 读取固件版本和对应的硬件版本 */
