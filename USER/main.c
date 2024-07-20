@@ -1,6 +1,7 @@
 #include "Process.h"
 
 /**
+
   * @brief  主程序初始化
   * @prarm  无
   * @retval int
@@ -14,16 +15,17 @@ int main()
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
     
 	puts("-----BEGIN-----");
-    SensorON(0);
-	Stepper_Turn(3,UP3,C1);
+//    SensorON(1);
+//    SensorON(2);
+//	Stepper_Turn(3,UP3,C1);
 	Stepper_Turn(4,UP4,C1);
-	Stepper_Turn(0,UP0,Z0); 
+	Stepper_Turn(5,UP0,Z0); 
     
-    
-	delay_ms(50);
+	delay_ms(500);
 	Motor_Run(0, MVEL);							//以800的速度正向行进
 	while(1)
 	{
+//        printf("dis %d = %.3f\r\n", 2, dist[2]);
 		//B线：识别
 		if(only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]){
 			BLine();

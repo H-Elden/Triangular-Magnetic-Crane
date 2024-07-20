@@ -191,10 +191,10 @@ void CmdProcess(void)//UART1接收到的数据会代入到这里进行检测
         case 'q':
             MotorState = Stop;                //设置停车，不能关闭TIM6因为还要靠速度环来停车
             for(u8 i = 0;i < 5;i++)        //关闭所有步进电机
-                StartStepper[i] = 0;
+                Stepper_StopNow();
             for(u8 i = 0;i < 3;i++)        //关闭所有电磁铁
                 MagnetOFF(i);
-            TIM_Cmd(TIM5,DISABLE);
+//            TIM_Cmd(TIM5,DISABLE);
         	Sensor_open = 0;
         break;
 

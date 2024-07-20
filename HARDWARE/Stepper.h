@@ -1,11 +1,9 @@
+#ifndef __STEPPER_H
+#define __STEPPER_H
 
-/*-----STEPPER 步进电机的板级支持包-----*/
+#include "usart3.h"
 
-#ifndef __BSP_STEPPER_H
-#define __BSP_STEPPER_H
-
-#include "sys.h"
-#include "delay.h"
+#define		ABS(x)		((x) > 0 ? (x) : -(x))
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -29,27 +27,26 @@
 #define C2 1000
 #define Z0 675
 
-extern GPIO_TypeDef * PUL_GPIO[5];
-extern u16 PUL_Pin[5];
-extern GPIO_TypeDef * DIR_GPIO[5];
-extern u16 DIR_Pin[5];
+typedef enum {
+	S_VER   = 0,			/* 读取固件版本和对应的硬件版本 */
+	S_RL    = 1,			/* 读取读取相电阻和相电感 */
+	S_PID   = 2,			/* 读取PID参数 */
+	S_VBUS  = 3,			/* 读取总线电压 */
+	S_CPHA  = 5,			/* 读取相电流 */
+	S_ENCL  = 7,			/* 读取经过线性化校准后的编码器值 */
+	S_TPOS  = 8,			/* 读取电机目标位置角度 */
+	S_VEL   = 9,			/* 读取电机实时转速 */
+	S_CPOS  = 10,			/* 读取电机实时位置角度 */
+	S_PERR  = 11,			/* 读取电机位置误差角度 */
+	S_FLAG  = 13,			/* 读取使能/到位/堵转状态标志位 */
+	S_Conf  = 14,			/* 读取驱动参数 */
+	S_State = 15,			/* 读取系统状态参数 */
+	S_ORG   = 16,     /* 读取正在回零/回零失败状态标志位 */
+} SysParams_t;
 
-/* ---- 电机操作定义 ---- */
-static inline void CW(u8 i) {GPIO_ResetBits(DIR_GPIO[i], DIR_Pin[i]);}		//第i个电机设置顺时针转动
-static inline void ACW(u8 i) {GPIO_SetBits(DIR_GPIO[i], DIR_Pin[i]);}			//第i个电机设置逆时针转动
-static inline void Stepper_Pul_HIGH(u8 i)	{GPIO_SetBits(PUL_GPIO[i], PUL_Pin[i]);}			//第i个电机设置脉冲为高电平
-static inline void Stepper_Pul_LOW(u8 i)	{GPIO_ResetBits(PUL_GPIO[i], PUL_Pin[i]);}		//第i个电机设置脉冲为低电平
-static inline void Stepper_Pul_TGL(u8 i)	{(GPIO_ReadInputDataBit(PUL_GPIO[i], PUL_Pin[i]) == Bit_SET) ? 
-																						Stepper_Pul_LOW(i) : Stepper_Pul_HIGH(i);}	//翻转第i个电机的脉冲电平
-
-extern u16 PulsePeriod[5];
-extern u16 RotationRate[5];
-extern u8 StartStepper[5];
-
-void Stepper_Init_TIM5(void);
-void Stepper_Turn(u8 i,u8 dir, float angle);				//转动步进电机
-
-void Stepper_SetRPM(u8 i,u16 rpm);									//设置步进电机转速
-void Stepper_SetPulsePeriod(u8 i,u16 n);						//设置脉冲周期
+void Print_RxCmd(void);
+void Stepper_StopNow(void);
+void Stepper_Turn(uint8_t addr, uint8_t dir, float angle);
+uint8_t Stepper_GetStatus(uint8_t addr);
 
 #endif

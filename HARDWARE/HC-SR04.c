@@ -138,6 +138,8 @@ uint8_t obj[6];												//i点是否存在砝码
 char isStore;													//存储哪条线上的砝码信息 '\0'表示不存储，'C'表示存储C线
 void EXTI_Sensor(uint8_t i)
 {
+     if(!(Sensor_open & (1<<i)))        //如果i传感器没开，但产生了中断，说明是电平抖动，直接return
+        return;
 	/*  if内替代写法： if(!(Echo_state & (1 << i)))，已经弃用 */
 	if(GPIO_ReadInputDataBit(Echo_GPIO[i], Echo_Pin[i]) != Bit_RESET)			//接收到的是上升沿引起的中断
 	{
@@ -157,7 +159,7 @@ void EXTI_Sensor(uint8_t i)
 			dist[i] = 0;
 		else
 			dist[i] = 0.0001 * cnt * 340 / 2 ;	//单位cm
-		
+		printf("dis %d = %.3f\r\n", i, dist[i]);
 		if(countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) > 3)				//近80次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)超过50次 就 停车
 		{
 			//关闭传感器 + 置零测距值
@@ -175,9 +177,9 @@ void EXTI_Sensor(uint8_t i)
             {
 				obj[i] = 1;
                 if(obj[0])
-                    isStop = 1;
-                else
                     isStop = 0;
+                else
+                    isStop = 1;
             }
 			else if(isStore == 'E' && i!= 0)
 				obj[i+2] = 1;

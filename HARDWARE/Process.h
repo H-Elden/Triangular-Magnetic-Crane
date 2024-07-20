@@ -4,7 +4,7 @@
 #define __PROCESS_H_
 
 #include "delay.h"
-#include "usart.h"
+#include "usart1.h"
 #include "led.h"
 #include "key.h"
 #include "motorencoder.h" 
@@ -12,6 +12,7 @@
 #include "Stepper.h"
 #include "magnet.h"
 #include "uart2.h"
+#include "usart3.h"
 #include "wit_c_sdk.h"
 #include "gyroscope.h"
 

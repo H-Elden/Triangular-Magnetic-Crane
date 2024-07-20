@@ -1,7 +1,7 @@
 #include "motorencoder.h"
 
 int LTargetVelocity = -0, RTargetVelocity = +0, LTargetVelocity_f, RTargetVelocity_f; //目标速度
-float LTargetCircle = -0, RTargetCircle = 0;						//目标圈数(位置)  一圈20.5cm
+float LTargetCircle = -0, RTargetCircle = 0;						//目标圈数(位置)
 int LCurrentPosition, RCurrentPosition, LCurrentPosition_V, RCurrentPosition_V;
 int LEncoder, REncoder;													//编码器读数
 int LPWM, RPWM; 																	//PWM 控制变量
@@ -10,7 +10,7 @@ float Position_Kp = 0.25, Position_Ki = 0.02, Position_Kd = 1; 		//相关位置 PID 
 float Fudu = 1000.0;     //加减速幅度  加减速圈数约等于目标速度除以加减速幅度
 int n_Fudu = 0;
 int flag_fudu=0;
-int LStartMinV, RStartMinV; //初始最小速度为目标速度的十分之一
+int LStartMinV, RStartMinV; //初始最小速度为目标速度的五分之一
 float ZhongZhi; //单轴陀螺仪定义走直中值
 float Run_Dis;			//正数表示正向行进总距离(A点为0)，负数表示反向行进总距离(H点为0)。单位mm
 float Con_Dis;			//继续行走 Con_Dis 毫米的距离停车
@@ -170,8 +170,7 @@ void TIM6_IRQHandler() {
 				
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-				SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
-				//一直加到65536后，pwm会被自动置0  因为l298n的定时器
+				SetPWM(LPWM, RPWM);
 				break;
 			}
 			case Velocity_Xunji: {
@@ -181,22 +180,23 @@ void TIM6_IRQHandler() {
 					RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
 					LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 					RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-					SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
+					SetPWM(LPWM, RPWM);
 				break;
 			}
 			/*----速度环 + 位置环----*/
 			case VelCir: {
 				static int LPWM_P, LPWM_V, RPWM_P, RPWM_V; 				//速度位置串级 PID 控制变量 PWM_P、PWM_V
-				//static int TimeCount;
 				
 				LCurrentPosition += LEncoder; 	//编码器读数(速度)积分得到位置
 				RCurrentPosition += REncoder; 	//编码器读数(速度)积分得到位置
 
-                if(Myabs(LTargetCircle*54000-LCurrentPosition) < 5400 && LEncoder == 0)
+                if(Myabs(LTargetCircle*54000-LCurrentPosition) < 5400 && LEncoder == 0)//当编码器读数为0即为停车
+                    
                 {
                     LTargetVelocity_f=0;
 					RTargetVelocity_f=0;
 					MotorState=Stop;
+                    puts("stopFlag");
                 }
 				
 				LPWM_P = LPosition_FeedbackControl(LTargetCircle, LCurrentPosition); //位置闭环控制
