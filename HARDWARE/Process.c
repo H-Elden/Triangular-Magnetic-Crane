@@ -377,11 +377,14 @@ void Catch(char Line, u8 odd, u8 mid, u8 even) {
 		case 'E':
 		case 'c':
 			angle_wai = S2;
+			break;
 		case 'F':
 		case 'C':
 			angle_wai = S2 - S1;
+			break;
 		default:
 			angle_wai = 0;
+			break;
 	}
 
 	if (odd)	while (Stepper_GetStatus(1) || Stepper_GetStatus(3));

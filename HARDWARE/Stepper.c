@@ -45,8 +45,8 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 	uint8_t cmd[13] = {0};
 	//脉冲数 = 角度 / 步进角（1.8） * 细分数（16）
 	uint32_t clk = angle / 1.8 * 16;
-	uint16_t vel = 200;
-	uint8_t acc = 200;
+	uint16_t vel = SVEL;
+	uint8_t acc = SACC;
 	// 装载命令
 	cmd[0]  =  addr;                      // 地址
 	cmd[1]  =  0xFD;                      // 功能码

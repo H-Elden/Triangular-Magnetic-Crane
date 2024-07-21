@@ -5,6 +5,9 @@
 
 #define		ABS(x)		((x) > 0 ? (x) : -(x))
 
+#define SVEL 200							//设置步进的速度
+#define SACC 200							//设置步进的加速度
+
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
 #define STEPANGLE			1.8			//步进电机的步进角，角度制
