@@ -5,9 +5,9 @@
   * @param    无
   * @retval   无
   */
-void Print_RxCmd(void){
-	for(u8 i = 0; i < rxCount;i++)
-		printf("%02X ",rxCmd[i]);
+void Print_RxCmd(void) {
+	for (u8 i = 0; i < rxCount; i++)
+		printf("%02X ", rxCmd[i]);
 	puts("");
 }
 
@@ -90,10 +90,10 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 	rxFrameFlag = false;									// 清除接收标志
 
 	if (rxCmd[1]) {
-		if (rxCmd[2] & 0x02){
-            printf("%d Stepper Stop\r\n",addr);
-           return 0;				// 电机旋转到位
-        }
+		if (rxCmd[2] & 0x02) {
+			printf("%d Stepper Stop\r\n", addr);
+			return 0;				// 电机旋转到位
+		}
 		return 1;														// 电机旋转未到位
 	}
 	return 2;														// 错误

@@ -7,7 +7,7 @@
 #include "usart1.h"
 #include "led.h"
 #include "key.h"
-#include "motorencoder.h" 
+#include "motorencoder.h"
 #include "HC-SR04.h"
 #include "Stepper.h"
 #include "magnet.h"
@@ -19,28 +19,22 @@
 extern int way;
 extern float PointDis[5][3];
 
+//初始化函数
 void Init(void);
 void PointDis_Init(void);
 
+//操作函数
+void Catch(char Line, u8 odd, u8 mid, u8 even);
+void Place_Side(void);
+
+//过程函数
 void BLine(void);
 void CLine(void);
-void Cyline(void);
-void ELine1(void);
-void ELine21(void);
-void ELine22(void);
-void ELine221(void);
-void FLine1(void);
-void FLine2(void);
-void HLine1(void);
-void HLine2(void);
-void GLine1(void);
-void DPoint1(void);
-void DPoint2(void);
-void CLine1(void);
-void BLine1(void);
+void DPoint(void);
+void E1_Check(void);
+void ELine0(void);
+void HLine(void);
+void Back(void);
 void ILine(void);
-
-void Cyline(void);
-void DPoint2(void); 
 
 #endif
