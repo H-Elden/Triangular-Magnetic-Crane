@@ -13,13 +13,6 @@ int main() {
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	MagnetON(1);
 	puts("-----BEGIN-----");
-//	Stepper_Turn(3, UP3, C2);
-//	while(Stepper_GetStatus(3));
-//	delay_ms(1000);
-//	Stepper_Turn(3, DOWN3, C2);
-//	while(Stepper_GetStatus(3));
-//	delay_ms(50);
-//	MagnetOFF(1);
 
 	Stepper_Turn(3, UP3, C1);
 	Stepper_Turn(4, UP4, C1);

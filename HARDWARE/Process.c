@@ -8,6 +8,9 @@
   * @retval 无
   */
 void Init() {
+#if TIMER_ENABLE
+	TIM5_Init();								//全局定时器，用于判断步进是否到位	使用定时器5
+#endif
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //中断优先级分组2
 	delay_init(); 							//延迟函数初始化
 	LED_Init(); 								//LED灯初始化
@@ -267,6 +270,7 @@ void HLine() {
 	LED_GREEN = 1;		//关灯重置
 	puts("H Close 1");
 	while (MotorState != Stop);	//阻塞等待 车子停稳
+	puts("H STOP");
 	Run_Dis = 0;			//置零，回程距离为负
 
 	Place_Side();			//放置两侧的砝码

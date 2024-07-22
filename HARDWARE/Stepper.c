@@ -1,5 +1,45 @@
 #include "stepper.h"
 
+#if TIMER_ENABLE
+// 全局变量，用于记录定时，单位100ms
+volatile uint32_t timer = 0;
+uint32_t close_time[6];		//关闭步进的时间点
+
+void TIM5_Init(void) {
+	// 启动时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+	// 定时器基本配置
+	TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 自动重装载值，定时器计数到1000时溢出
+	TIM_TimeBaseStructure.TIM_Prescaler = 7200 - 1; // 预分频器，定时器时钟为10kHz
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; // 向上计数模式
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+
+	// 定时器5中断配置
+	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// 使能定时器5更新中断
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
+
+	// 使能定时器5
+	TIM_Cmd(TIM5, ENABLE);
+}
+
+void TIM5_IRQHandler(void) {
+	if (TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET) {
+		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+		timer++; // 更新溢出计数，每过去100ms(0.1s)就加1
+	}
+}
+
+#endif	/* TIMER_ENABLE */
+
 /**
   * @brief    打印步进电机驱动板通过串口返回的信息
   * @param    无
@@ -68,6 +108,26 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 	while (rxFrameFlag == false);
 	Print_RxCmd();											  //打印串口信息
 	rxFrameFlag = false;									// 清除接收标志
+	
+#if TIMER_ENABLE
+	//计算关闭电机的时间
+	if(addr == 1 || addr == 2){
+		if(angle == S1)
+			close_time[addr] = timer + TIME_S1;			//关闭电机的时间点 = 当前时间点 + 电机转动时间
+		else if(angle == S2)
+			close_time[addr] = timer + TIME_S2;
+		else if(angle == S2 - S1)
+			close_time[addr] = timer + TIME_S2_1;
+	}
+	else{
+		if(angle == C1)
+			close_time[addr] = timer + TIME_C1;
+		else if(angle == C2)
+			close_time[addr] = timer + TIME_C2;
+		else if(angle == Z0)
+			close_time[addr] = timer + TIME_Z0;
+	}
+#endif
 }
 
 /**
@@ -76,6 +136,7 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
   * @retval   1：正在旋转；0：旋转到位；2：错误
   */
 uint8_t Stepper_GetStatus(uint8_t addr) {
+#if TIMER_MEASURE
 	uint8_t cmd[3] = {0};
 
 	// 装载命令
@@ -97,5 +158,142 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 		return 1;														// 电机旋转未到位
 	}
 	return 2;														// 错误
+	
+#else
+	return timer < close_time[addr] + 5;			//相当于多加500ms 
+#endif
 }
+
+#if TIMER_MEASURE
+/**
+  * @brief    测量步进电机的运行时间
+  * @param    无
+  * @retval   无
+	* @note			使用说明：修改stepper.h的宏定义，1 1
+						在主函数while(1)循环前面调用此函数，机器所有抓手摆放
+						至初始位置，打开串口等待输出测量结果。
+  */
+void Stepper_TimerINIT(){
+	/* 先向上抬够高 */
+	Stepper_Turn(3, UP3, C1);
+	Stepper_Turn(4, UP4, C1);
+	Stepper_Turn(5, UP0, Z0);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4) || Stepper_GetStatus(5));
+	
+	u32 t[6] = {0},temp,i;
+	/* TIME_S1 = t[0] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(1,WAI1,S1);
+		Stepper_Turn(2,WAI2,S1);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止
+		t[0] += timer - temp;
+		printf("t[0] = %d\r\n",timer - temp);
+		temp = timer;
+		Stepper_Turn(1,NEI1,S1);
+		Stepper_Turn(2,NEI2,S1);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止
+		t[0] += timer - temp;
+		printf("t[0] = %d\r\n",timer - temp);
+	}
+	/* TIME_S2 = t[1] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(1,WAI1,S2);
+		Stepper_Turn(2,WAI2,S2);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止	
+		t[1] += timer - temp;
+		printf("t[1] = %d\r\n",timer - temp);
+
+		temp = timer;
+		Stepper_Turn(1,NEI1,S2);
+		Stepper_Turn(2,NEI2,S2);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止	
+		t[1] += timer - temp;
+		printf("t[1] = %d\r\n",timer - temp);
+	}
+	/* TIME_S2_1 = t[2] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(1,WAI1,S2 - S1);
+		Stepper_Turn(2,WAI2,S2 - S1);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止	
+		t[2] += timer - temp;
+		printf("t[2] = %d\r\n",timer - temp);
+		
+		temp = timer;
+		Stepper_Turn(1,NEI1,S2 - S1);
+		Stepper_Turn(2,NEI2,S2 - S1);
+		while(Stepper_GetStatus(1) || Stepper_GetStatus(2));			//阻塞等待停止	
+		t[2] += timer - temp;
+		printf("t[2] = %d\r\n",timer - temp);
+	}
+	
+	/* 回到地面 */
+	Stepper_Turn(3, DOWN3, C1);
+	Stepper_Turn(4, DOWN4, C1);
+	Stepper_Turn(5, DOWN0, Z0);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4) || Stepper_GetStatus(5));
+	
+	/* TIME_C1 = t[3] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(3,UP3,C1);
+		Stepper_Turn(4,UP4,C1);
+		while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+		t[3] += timer - temp;
+		printf("t[3] = %d\r\n",timer - temp);
+		
+		temp = timer;
+		Stepper_Turn(3,DOWN3,C1);
+		Stepper_Turn(4,DOWN4,C1);
+		while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+		t[3] += timer - temp;
+		printf("t[3] = %d\r\n",timer - temp);
+	}
+	/* TIME_C2 = t[4] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(3,UP3,C2);
+		Stepper_Turn(4,UP4,C2);
+		while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+		t[4] += timer - temp;
+		printf("t[4] = %d\r\n",timer - temp);
+		
+		temp = timer;
+		Stepper_Turn(3,DOWN3,C2);
+		Stepper_Turn(4,DOWN4,C2);
+		while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+		t[4] += timer - temp;
+		printf("t[4] = %d\r\n",timer - temp);
+	}
+	/* TIME_Z0 = t[5] */
+	for(i = 0;i < 2;i++){
+		temp = timer;
+		Stepper_Turn(5,UP0,Z0);
+		while(Stepper_GetStatus(5));			//阻塞等待停止	
+		t[5] += timer - temp;
+		printf("t[5] = %d\r\n",timer - temp);
+		
+		temp = timer;
+		Stepper_Turn(5,DOWN0,Z0);
+		while(Stepper_GetStatus(5));			//阻塞等待停止	
+		t[5] += timer - temp;
+		printf("t[5] = %d\r\n",timer - temp);
+	}
+	/* 求平均数 */
+	for(i = 0;i<6;i++)
+		t[i] >>= 2;
+	/* 输出测量结果 */
+	printf("----- 测量完成！ -----\r\n");
+	printf("/* 基于速度SVEL = %d 加速度SACC = %d 的测量结果如下 */\r\n", SVEL, SACC);
+	printf("#define TIME_S1\t\t%d\r\n",t[0]);
+	printf("#define TIME_S2\t\t%d\r\n",t[1]);
+	printf("#define TIME_S2_1\t%d\r\n",t[2]);
+	printf("#define TIME_C1\t\t%d\r\n",t[3]);
+	printf("#define TIME_C2\t\t%d\r\n",t[4]);
+	printf("#define TIME_Z0\t\t%d\r\n",t[5]);
+}
+#endif	/* TIMER_MEASURE */
+
 
