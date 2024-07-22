@@ -222,6 +222,8 @@ void ELine0() {
 		LED_RED = 1;
 		puts("E0 OFF 0");
 		dist[0] = 0;
+		if(!obj[3])	Stepper_Turn(1,WAI1,S1);
+		if(!obj[4])	Stepper_Turn(2,WAI2,S1);
 		Catch('E', obj[3], 0, obj[4]);							//E抓取
 		if (obj[3] && obj[4]) {
 			Motor_Run(0, MVEL);
@@ -318,18 +320,18 @@ void Back() {
 			Run(1, 187.5, MVEL);
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 			Catch('c', !obj[1], 0, !obj[2]);//在Cy抓取
-			if (!obj[3] && !obj[4])					//Cy抓了两个，直接去I
+			if (!obj[1] && !obj[2])					//Cy抓了两个，直接去I
 				Motor_Run(1, MVEL);
 			else {													//还要去C抓
 				Run(1, 187.5, MVEL);
 				while (MotorState != Stop);		//阻塞等待 车子停稳
-				Catch('C', obj[3], 0, obj[4]);//在C抓
+				Catch('C', obj[1], 0, obj[2]);//在C抓
 				Motor_Run(1, MVEL);
 			}
 		} else {
 			Run(1, 375, MVEL);
 			while (MotorState != Stop);				//阻塞等待 车子停稳
-			Catch('C', obj[3], 0, obj[4]);		//在C抓
+			Catch('C', obj[1], 0, obj[2]);		//在C抓
 			Motor_Run(1, MVEL);
 		}
 	}
@@ -370,7 +372,7 @@ void ILine() {
   * @retval 无
   */
 void Catch(char Line, u8 odd, u8 mid, u8 even) {
-	if (!(odd && mid && even))		return;					//三个都不抓
+	if (!(odd || mid || even))		return;					//三个都不抓
 	printf("\r\n----- %c%d Catch -----\r\n", Line, way);
 	float angle_wai;
 	switch (Line) {

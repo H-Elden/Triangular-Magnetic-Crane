@@ -180,8 +180,8 @@ void EXTI_Sensor(uint8_t i) {
 			}
 			//走一圈 + 停车
 			if (isStop) {
-				Con_Stop(Myabs(Con_Dis - Run_Dis));			//继续走Con_Dis mm停车
-				printf("Con_Stop = %.0f\n", Con_Dis);
+				Con_Stop(Myabs(Con_Dis - Run_Dis));			//继续走多少mm停车
+				printf("Con_Stop = %.0f\n", Con_Dis - Run_Dis);
 				printf("Sensor_open = %d\n", Sensor_open);
 				isStop = 0;
 			}
