@@ -127,7 +127,7 @@ void TIM6_IRQHandler() {
 				RTargetVelocity = RTargetVelocity_f;
 			}
 			if (MotorState == VelCir) {
-				if (Fudu * (Myabs(LTargetCircle) - 1.0 * Myabs(LCurrentPosition) / 54000) < Myabs(LTargetVelocity_f) || Fudu * (Myabs(RTargetCircle) - 1.0 * Myabs(RCurrentPosition) / 54000) < Myabs(RTargetVelocity_f)) {
+				if (Fudu * (Myabs(LTargetCircle) - 1.0 * Myabs(LCurrentPosition) / 54000) < Myabs(LTargetVelocity_f) || Fudu* (Myabs(RTargetCircle) - 1.0 * Myabs(RCurrentPosition) / 54000) < Myabs(RTargetVelocity_f)) {
 
 					LTargetVelocity = Fudu * (LTargetCircle - 1.0 * LCurrentPosition / 54000);
 					RTargetVelocity = -LTargetVelocity;

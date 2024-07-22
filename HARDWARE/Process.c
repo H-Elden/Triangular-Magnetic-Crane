@@ -129,13 +129,16 @@ void CLine() {
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
 		while (MotorState != Stop);	//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
-		if (obj[1] && obj[2]) {
+		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
-		} else {
+			while(Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
+			E1_Check();
+		} else {													//先去Cy再去D
 			Run(0, 187.5, MVEL);
 			while (MotorState != Stop);			//阻塞等待 车子停稳
-			Catch('c', !obj[1], 0, !obj[2]);		//中线一定不抓
-			Run(0, 187.5, MVEL);
+			Catch('c', !obj[1], 0, !obj[2]);//中线一定不抓
+			Run(0, 187.5, MVEL);						//从Cy线走就开启超声波，到D关
+			E1_Check();
 		}
 		while (MotorState != Stop);				//阻塞等待 车子停稳
 		DPoint();
@@ -152,6 +155,13 @@ void CLine() {
 void DPoint() {
 	puts("");
 	puts("----- D Point -----");
+	if(way) {
+		Sensor_open = 0;			//关闭所有传感器
+		LED_GREEN = 1;				//关灯重置
+		LED_RED = 1;					//关灯重置
+		puts("E1 OFF All");
+		dist[1] = dist[2] = 0;
+	}
 	delay_ms(50);
 	MagnetOFF(0);										//关闭电磁铁0
 	delay_ms(50);
@@ -177,13 +187,6 @@ void E1_Check() {
 	SensorON(1);
 	SensorON(2);
 	puts("E1 ON 1 2");
-	while (Sensor_open && Run_Dis < PointDis[2][2]);
-	Sensor_open = 0;			//关闭所有传感器
-	delay_ms(200);
-	LED_GREEN = 1;				//关灯重置
-	LED_RED = 1;					//关灯重置
-	puts("E1 OFF All");
-	dist[1] = dist[2] = 0;
 }
 
 /**
@@ -207,16 +210,17 @@ void ELine0() {
 	puts("E0 ON 1 2");
 	//阻塞等待直到 已经停车 或者 已经走过E线
 	while (MotorState == Velocity_Xunji && Run_Dis < PointDis[2][2]);
-	Sensor_open = 0;	//关闭所有传感器
-	SensorON(0);
 	if (!obj[3] && !obj[4])
 		Con_Stop(1575 - Run_Dis);
+	delay_ms(100);
+	Sensor_open = 0;	//关闭所有传感器
+	LED_GREEN = 1;		//关灯重置
+	LED_RED = 1;			//关灯重置
 	puts("E0 OFF 1 2");
+	SensorON(0);
 	puts("E0 ON 0");
 	SensorON(0);
 	delay_ms(100);
-	LED_GREEN = 1;		//关灯重置
-	LED_RED = 1;			//关灯重置
 	dist[1] = dist[2] = 0;
 
 	if (obj[3] || obj[4]) {
@@ -429,7 +433,7 @@ void Place_Side() {
 	MagnetOFF(2);										//关闭电磁铁2
 	delay_ms(50);
 
-	Stepper_Turn(3, UP3, C1);				//步进3向上提举，脱离砝码
+	Stepper_Turn(3, UP3, C1 - 20);				//步进3向上提举，脱离砝码
 	Stepper_Turn(4, UP4, C1);				//步进4向上提举，脱离砝码
 	while (Stepper_GetStatus(3) || Stepper_GetStatus(4));		//等待步进电机向上移动完毕
 }
