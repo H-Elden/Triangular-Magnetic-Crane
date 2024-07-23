@@ -248,7 +248,11 @@ void ELine0() {
 		SensorOFF(0);																//如果没有测到也没有停车，会在这里关闭超声波0
 		dist[0] = 0;
 		puts("E0 OFF 0");
-		while (MotorState != Stop);									//阻塞等待 车子停稳
+		u32 i = 0;
+		while (MotorState != Stop){									//阻塞等待 车子停稳
+			printf("%d\r\n",i++);			//看看是堵在循环里面还是循环外面
+		}
+		puts("back");
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
 		delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 		Motor_Run(0, MVEL);
@@ -315,7 +319,12 @@ void Back() {
 	} else {
 		obj[1] ? Stepper_Turn(1, NEI1, S2 - S1) : Stepper_Turn(1, NEI1, S2);					//步进1向内到达正确位置
 		obj[2] ? Stepper_Turn(2, NEI2, S2 - S1) : Stepper_Turn(2, NEI2, S2);					//步进2向内到达正确位置
-		obj[5] ? Run(1, 1005, MVEL) : Run(1, 255, MVEL);															//抓过了就去D，否则去G抓
+		if(!obj[5])
+			Run(1, 255, MVEL);							//去G抓
+		else if(obj[3] && obj[4])
+			Run(1, 630, MVEL);							//去F抓
+		else
+			Run(1, 1005, MVEL);							//去D
 		delay_ms(200);										//避免抓手下降挂到砝码
 		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
 		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
@@ -323,6 +332,11 @@ void Back() {
 		if (!obj[5]) {
 			Catch('G', 0, 1, 0);						//在G抓取
 			Run(1, 750, MVEL);							//去D
+			while (MotorState != Stop);			//阻塞等待 车子停稳
+		}
+		else if (obj[3] && obj[4]) {
+			Catch('F', 0, 1, 0);						//在F抓取
+			Run(1, 375, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}
 		DPoint();													//在D放置
