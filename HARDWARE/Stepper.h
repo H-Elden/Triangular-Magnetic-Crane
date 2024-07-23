@@ -13,8 +13,8 @@
 #define TIMER_ENABLE	1				//是否采用计时的方法判断步进停止
 #define TIMER_MEASURE	0				//是否要测量计时的数据
 
-#define SVEL 200							//设置步进的速度
-#define SACC 200							//设置步进的加速度
+#define SVEL 250							//设置步进的速度
+#define SACC 220							//设置步进的加速度
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -40,13 +40,13 @@
 
 #if TIMER_ENABLE
 
-/* 基于速度SVEL = 200 加速度SACC = 200 的测量结果如下 */
-#define TIME_S1		18
-#define TIME_S2		22
-#define TIME_S2_1	9
-#define TIME_C1		9
-#define TIME_C2		13
-#define TIME_Z0		10
+/* 基于速度SVEL = 250 加速度SACC = 220 的测量结果如下 */
+#define TIME_S1		14
+#define TIME_S2		18
+#define TIME_S2_1	7
+#define TIME_C1		7
+#define TIME_C2		11
+#define TIME_Z0		8
 
 #endif	/* TIMER_ENABLE */
 
@@ -69,6 +69,7 @@ typedef enum {
 
 #if TIMER_ENABLE
 void TIM5_Init(void);
+extern volatile uint32_t timer;
 #endif
 #if TIMER_MEASURE
 void Stepper_TimerINIT(void);

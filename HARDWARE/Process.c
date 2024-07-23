@@ -220,7 +220,7 @@ void ELine0() {
 	SensorON(0);
 	puts("E0 ON 0");
 	SensorON(0);
-	delay_ms(100);
+//	delay_ms(100);
 	dist[1] = dist[2] = 0;
 
 	if (obj[3] || obj[4]) {
@@ -235,20 +235,22 @@ void ELine0() {
 		if (obj[3] && obj[4]) {
 			Motor_Run(0, MVEL);
 		} else {
-			Run(0, 200, MVEL);												//去F抓
+			Run(0, 187.5, MVEL);											//去F抓
 			while (MotorState != Stop);								//阻塞等待 车子停稳
 			Catch('F', !obj[3], obj[5], !obj[4]); 		//F抓取
+			delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 			Motor_Run(0, MVEL);
 		}
 	} else {
 		Stepper_Turn(1, WAI1, S1);
 		Stepper_Turn(2, WAI2, S1);
-		while (Run_Dis <= 1387.5);
+		while (Run_Dis <= 1387.5 - 100);						//防止机子太快误测到G点砝码
 		SensorOFF(0);																//如果没有测到也没有停车，会在这里关闭超声波0
 		dist[0] = 0;
 		puts("E0 OFF 0");
 		while (MotorState != Stop);									//阻塞等待 车子停稳
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
+		delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 		Motor_Run(0, MVEL);
 	}
 }
@@ -433,7 +435,7 @@ void Place_Side() {
 	MagnetOFF(2);										//关闭电磁铁2
 	delay_ms(50);
 
-	Stepper_Turn(3, UP3, C1 - 20);				//步进3向上提举，脱离砝码
+	Stepper_Turn(3, UP3, C1);				//步进3向上提举，脱离砝码
 	Stepper_Turn(4, UP4, C1);				//步进4向上提举，脱离砝码
 	while (Stepper_GetStatus(3) || Stepper_GetStatus(4));		//等待步进电机向上移动完毕
 }
