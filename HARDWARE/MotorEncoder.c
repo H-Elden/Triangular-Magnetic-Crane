@@ -1,7 +1,7 @@
 #include "motorencoder.h"
 
 int LTargetVelocity = -0, RTargetVelocity = +0, LTargetVelocity_f, RTargetVelocity_f; //目标速度
-float LTargetCircle = -0, RTargetCircle = 0;						//目标圈数(位置)
+float LTargetCircle = -0, RTargetCircle = 0;						//目标圈数(位置)  一圈20.5cm
 int LCurrentPosition, RCurrentPosition, LCurrentPosition_V, RCurrentPosition_V;
 int LEncoder, REncoder;													//编码器读数
 int LPWM, RPWM; 																	//PWM 控制变量
@@ -9,8 +9,8 @@ float Velcity_Kp = 1, Velcity_Ki = 0.5, Velcity_Kd; 								//相关速度 PID 参数
 float Position_Kp = 0.25, Position_Ki = 0.02, Position_Kd = 1; 		//相关位置 PID 参数
 float Fudu = 1000.0;     //加减速幅度  加减速圈数约等于目标速度除以加减速幅度
 int n_Fudu = 0;
-int flag_fudu = 0;
-int LStartMinV, RStartMinV; //初始最小速度为目标速度的五分之一
+int flag_fudu=0;
+int LStartMinV, RStartMinV; //初始最小速度为目标速度的十分之一
 float ZhongZhi; //单轴陀螺仪定义走直中值
 float Run_Dis;			//正数表示正向行进总距离(A点为0)，负数表示反向行进总距离(H点为0)。单位mm
 float Con_Dis;			//继续行走 Con_Dis 毫米的距离停车
@@ -33,7 +33,7 @@ MotorState_t MotorState = Stop;									//默认停车
   */
 void Motor_Run(uint8_t dir, uint16_t vel) {
 	MotorState = Velocity_Xunji;
-	flag_fudu = 0;
+    flag_fudu = 0;
 	switch (dir) {
 		case 0: {
 			LTargetVelocity_f = -vel;
@@ -61,7 +61,7 @@ void Motor_Run(uint8_t dir, uint16_t vel) {
   */
 void Con_Stop(float dis) {
 	MotorState = VelCir;
-	flag_fudu = 0;
+    flag_fudu = 0;
 	if (LTargetVelocity_f < 0) {
 		LTargetCircle = -1.0 * dis / (2 * PI * Radius);
 		RTargetCircle = -LTargetCircle;
@@ -94,11 +94,12 @@ void Run(uint8_t dir, float dis, uint16_t vel) {
 	}
 }
 
-float Myabs(float a) {
-	float temp;
-	if (a < 0) temp = -a;
-	else temp = a;
-	return temp;
+float Myabs(float a)
+{ 		   
+	  float temp;
+		if(a<0) temp=-a;  
+	  else temp=a;
+	  return temp;
 }
 
 /**************************************************************************
@@ -111,37 +112,46 @@ void TIM6_IRQHandler() {
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) == 1) { //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 		LEncoder = LRead_Encoder();   		//读取当前编码器读数，即速度
 		REncoder = RRead_Encoder();   		//读取当前编码器读数，即速度
-		if (flag_fudu == 0) {
-			if (n_Fudu == 1) {
-				LCurrentPosition_V += LEncoder;
-				LTargetVelocity = (Fudu + 2000) * LCurrentPosition_V / 54000 + LStartMinV;
-				RTargetVelocity = -LTargetVelocity;
-			} else {
-				LCurrentPosition_V += LEncoder;
-				LTargetVelocity = Fudu * LCurrentPosition_V / 54000 + LStartMinV;
-				RTargetVelocity = -LTargetVelocity;
-			}
-			if (Myabs(LTargetVelocity) >= Myabs(LTargetVelocity_f) || Myabs(RTargetVelocity) >= Myabs(RTargetVelocity_f)) {
-				n_Fudu = 0;
-				LTargetVelocity = LTargetVelocity_f;
-				RTargetVelocity = RTargetVelocity_f;
-			}
-			if (MotorState == VelCir) {
-				if (Fudu * (Myabs(LTargetCircle) - 1.0 * Myabs(LCurrentPosition) / 54000) < Myabs(LTargetVelocity_f) || Fudu* (Myabs(RTargetCircle) - 1.0 * Myabs(RCurrentPosition) / 54000) < Myabs(RTargetVelocity_f)) {
+               if(flag_fudu==0)
+                {
+                    if(n_Fudu == 1)
+                    {
+                        LCurrentPosition_V += LEncoder;
+                        LTargetVelocity=(Fudu + 2000)*LCurrentPosition_V/54000+LStartMinV;
+                        RTargetVelocity=-LTargetVelocity;
+                    }
+                    else
+                    {
+                        LCurrentPosition_V += LEncoder;
+                        LTargetVelocity=Fudu*LCurrentPosition_V/54000+LStartMinV;
+                        RTargetVelocity=-LTargetVelocity;
+                    }
+                    if(Myabs(LTargetVelocity)>=Myabs(LTargetVelocity_f)||Myabs(RTargetVelocity)>=Myabs(RTargetVelocity_f))
+                    {
+                        n_Fudu = 0;
+						LTargetVelocity = LTargetVelocity_f;
+						RTargetVelocity = RTargetVelocity_f;
+                    }
+                    if(MotorState == VelCir)
+                    {
+                        if(Fudu*(Myabs(LTargetCircle)-1.0*Myabs(LCurrentPosition)/54000)<Myabs(LTargetVelocity_f)||Fudu*(Myabs(RTargetCircle)-1.0*Myabs(RCurrentPosition)/54000)<Myabs(RTargetVelocity_f))
+                        {
 
-					LTargetVelocity = Fudu * (LTargetCircle - 1.0 * LCurrentPosition / 54000);
-					RTargetVelocity = -LTargetVelocity;
-					if (Myabs(Fudu * LCurrentPosition_V / 54000 + LStartMinV) <= Myabs(Fudu * (LTargetCircle - 1.0 * LCurrentPosition / 54000))) {
-						LTargetVelocity = Fudu * LCurrentPosition_V / 54000 + LStartMinV;
-						RTargetVelocity = -LTargetVelocity;
-					}
-					if (Myabs(LTargetVelocity) <= Myabs(LStartMinV)) {
-						LTargetVelocity = LStartMinV;
-						RTargetVelocity = RStartMinV;
-					}
-				}
-			}
-		}
+                                LTargetVelocity= Fudu*(LTargetCircle-1.0*LCurrentPosition/54000);
+                                RTargetVelocity=-LTargetVelocity;
+                                if(Myabs(Fudu*LCurrentPosition_V/54000+LStartMinV) <= Myabs(Fudu*(LTargetCircle-1.0*LCurrentPosition/54000)))
+                                {
+                                    LTargetVelocity=Fudu*LCurrentPosition_V/54000+LStartMinV;
+                                    RTargetVelocity=-LTargetVelocity;
+                                }
+                                if(Myabs(LTargetVelocity) <= Myabs(LStartMinV))
+                                {
+                                    LTargetVelocity = LStartMinV;
+                                    RTargetVelocity = RStartMinV;
+                                }
+                        }
+                    }
+                }
 		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis全局变量往后修改
 		if (Sensor_open)
 			Getdis();
@@ -151,44 +161,44 @@ void TIM6_IRQHandler() {
 				//LED_GREEN = 0;
 				LTargetVelocity = 0;
 				RTargetVelocity = 0;
-
+				
 				LCurrentPosition = 0;
-				RCurrentPosition = 0;
-
-				flag_fudu = 1;
-				LCurrentPosition_V = 0;
-
+                RCurrentPosition = 0;
+                
+                flag_fudu = 1;
+                LCurrentPosition_V = 0;
+				
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-				SetPWM(LPWM, RPWM);
+				SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
+				//一直加到65536后，pwm会被自动置0  因为l298n的定时器
 				break;
 			}
 			case Velocity_Xunji: {
-				Gyro_read();
+                    Gyro_read();
 //					printf("%d    %.3f\r\n", Turn(fAngle[2]), fAngle[2]);
-				LTargetVelocity = LTargetVelocity - Turn(fAngle[2]);
-				RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
-				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
-				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-				SetPWM(LPWM, RPWM);
+                	LTargetVelocity = LTargetVelocity - Turn(fAngle[2]);
+					RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
+					LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
+					RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
+					SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
 				break;
 			}
 			/*----速度环 + 位置环----*/
 			case VelCir: {
 				static int LPWM_P, LPWM_V, RPWM_P, RPWM_V; 				//速度位置串级 PID 控制变量 PWM_P、PWM_V
-
+				//static int TimeCount;
+				
 				LCurrentPosition += LEncoder; 	//编码器读数(速度)积分得到位置
 				RCurrentPosition += REncoder; 	//编码器读数(速度)积分得到位置
 
-				if (Myabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) //当编码器读数为0即为停车
-
-				{
-					LTargetVelocity_f = 0;
-					RTargetVelocity_f = 0;
-					MotorState = Stop;
-					puts("stopFlag");
-				}
-
+                if(Myabs(LTargetCircle*54000-LCurrentPosition) < 5400 && LEncoder == 0)
+                {
+                    LTargetVelocity_f=0;
+					RTargetVelocity_f=0;
+					MotorState=Stop;
+                }
+				
 				LPWM_P = LPosition_FeedbackControl(LTargetCircle, LCurrentPosition); //位置闭环控制
 				LPWM_P = Velocity_Restrict(LPWM_P, Myabs(LTargetVelocity)); //限幅位置环输出的 PWM
 				LPWM_V = LPWM_P / 2; //位置环输出的 PWM 值按一定比例转换为速度值，接下来使用该速度值进行速度闭环控制。
@@ -483,8 +493,8 @@ int Velocity_Restrict(int PWM_P, int TargetVelocity) {
 作    者：平衡小车之家
 **************************************************************************/
 int Turn(float YAW) { //转向控制
-	float Bias;
-	int Kp = 500, Kd = 2000;
+	float Bias; 
+    int Kp = 500, Kd = 2000;
 	static float Turn, Last_Bias;
 	Bias = YAW - ZhongZhi;
 //    Integral_Bias+=Bias;
