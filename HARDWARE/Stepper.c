@@ -19,7 +19,7 @@ void TIM5_Init(void) {
 
 	// 定时器5中断配置
 	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -168,7 +168,10 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 	return 2;														// 错误
 	
 #else
-	return timer < close_time[addr] + 5;			//相当于多加500ms 
+	if(timer < close_time[addr] + 5)			//相当于多加500ms 	
+		return 1;
+	printf("%d Stepper Stop\r\n",addr);
+	return 0;
 #endif
 }
 

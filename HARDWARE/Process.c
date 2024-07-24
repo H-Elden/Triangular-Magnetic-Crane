@@ -217,10 +217,8 @@ void ELine0() {
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
 	puts("E0 OFF 1 2");
-	SensorON(0);
 	puts("E0 ON 0");
 	SensorON(0);
-//	delay_ms(100);
 	dist[1] = dist[2] = 0;
 
 	if (obj[3] || obj[4]) {
@@ -315,17 +313,31 @@ void Back() {
 	} else {
 		obj[1] ? Stepper_Turn(1, NEI1, S2 - S1) : Stepper_Turn(1, NEI1, S2);					//步进1向内到达正确位置
 		obj[2] ? Stepper_Turn(2, NEI2, S2 - S1) : Stepper_Turn(2, NEI2, S2);					//步进2向内到达正确位置
-		obj[5] ? Run(1, 1005, MVEL) : Run(1, 255, MVEL);															//抓过了就去D，否则去G抓
+		if (!obj[5])
+			Run(1, 255, MVEL);							//去G抓
+		else if (obj[3] && obj[4])
+			Run(1, 630, MVEL);							//去F抓
+		else
+			Run(1, 1005, MVEL);							//去D
 		delay_ms(200);										//避免抓手下降挂到砝码
 		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
 		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
-		while (MotorState != Stop);				//阻塞等待 车子停稳
+		u8 i = 0;
+		while (MotorState != Stop){				//阻塞等待 车子停稳
+			printf("%d\r\n",i++);
+		}			
 		if (!obj[5]) {
 			Catch('G', 0, 1, 0);						//在G抓取
 			Run(1, 750, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
+		} else if (obj[3] && obj[4]) {
+			Catch('F', 0, 1, 0);						//在F抓取
+			Run(1, 375, MVEL);							//去D
+			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}
+		puts("before D");
 		DPoint();													//在D放置
+		puts("after D");
 		if (!obj[1] || !obj[2]) {					//先去Cy抓
 			Run(1, 187.5, MVEL);
 			while (MotorState != Stop);			//阻塞等待 车子停稳
@@ -369,6 +381,7 @@ void ILine() {
 	dist[3] = 0;
 	puts("I Close 3");
 	while (MotorState != Stop);		//阻塞等待 车子停稳
+	puts("I STOP");
 	Place_Side();
 }
 

@@ -20,7 +20,7 @@ extern int LTargetVelocity, RTargetVelocity, LCurrentPosition, RCurrentPosition,
 extern float LTargetCircle, RTargetCircle;
 extern float Velcity_Kp, Velcity_Ki, Velcity_Kd; //相关速度 PID 参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置 PID 参数
-extern int LStartMinV, RStartMinV; //初始最小速度为目标速度的十分之一
+extern int LStartMinV, RStartMinV; //初始最小速度为目标速度的五分之一
 extern MotorState_t MotorState;
 extern float ZhongZhi;
 extern int n_Fudu;
@@ -37,7 +37,6 @@ int LVelocity_FeedbackControl(int TargetVelocity, int CurrentVelocity);
 int RVelocity_FeedbackControl(int TargetVelocity, int CurrentVelocity);
 int Velocity_Restrict(int PWM_P, int TargetVelocity);
 int Turn(float YAW);
-float Myabs(float a);
 
 //要增加的接口
 extern float Run_Dis;			//正数表示正向行进总距离(A点为0)，负数表示反向行进总距离(H点为0)。单位mm

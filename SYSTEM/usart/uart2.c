@@ -43,8 +43,8 @@ void Usart2Init(unsigned int uiBaud)//USART2(串口2)初始化配置
 	
 	USART_Cmd(USART2, ENABLE);
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;//中断配置USART2
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 8;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }

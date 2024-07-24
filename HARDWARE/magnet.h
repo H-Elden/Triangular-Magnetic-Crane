@@ -4,14 +4,13 @@
 #define __MAGNET_H
 
 #include "sys.h"
-#include "stm32f10x_tim.h"
 
 extern GPIO_TypeDef * DIANCI_GPIO[3];
 extern u16 DIANCI_Pin[3];
 
 void Switch_Init(void);
 
-extern void MagnetON(u8 i);
-extern void MagnetOFF(u8 i);
+static inline void MagnetON(u8 i)	{GPIO_SetBits(DIANCI_GPIO[i], DIANCI_Pin[i]);}				//开启电磁铁i
+static inline void MagnetOFF(u8 i)	{GPIO_ResetBits(DIANCI_GPIO[i], DIANCI_Pin[i]);}		//关闭电磁铁i
 
 #endif	/*----- __MAGNET_H -----*/

@@ -80,7 +80,7 @@ void Stepper_StopNow(void);
 void Stepper_Turn(uint8_t addr, uint8_t dir, float angle);
 uint8_t Stepper_GetStatus(uint8_t addr);
 
-
+//配置步进电机驱动板
 void Stepper_GetCfg(uint8_t addr);
 void Stepper_SetCfg(uint8_t addr);
 
