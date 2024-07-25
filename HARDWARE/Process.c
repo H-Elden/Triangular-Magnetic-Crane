@@ -36,7 +36,6 @@ void Init() {
 	Gyro_read();
 	ZhongZhi = fAngle[2];
 	printf("ZhongZhi = %.3f\r\n", ZhongZhi);
-	n_Fudu = 1;
 
 	PointDis_Init();						//点位距离初始化
 	TIM6_Init(); 								//10ms 读取一次编码器(即100Hz)，使用定时器6
