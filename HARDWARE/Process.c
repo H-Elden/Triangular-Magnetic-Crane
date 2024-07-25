@@ -246,7 +246,7 @@ void ELine0() {
 		SensorOFF(0);																//如果没有测到也没有停车，会在这里关闭超声波0
 		dist[0] = 0;
 		puts("E0 OFF 0");
-		while (MotorState != Stop);									//阻塞等待 车子停稳
+		while (MotorState != Stop){putchar('-');}									//阻塞等待 车子停稳
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
 		delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 		Motor_Run(0, MVEL);
@@ -322,10 +322,9 @@ void Back() {
 		delay_ms(200);										//避免抓手下降挂到砝码
 		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
 		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
-		u8 i = 0;
 		while (MotorState != Stop){				//阻塞等待 车子停稳
-			printf("%d\r\n",i++);
-		}			
+			printf("-");
+		}
 		if (!obj[5]) {
 			Catch('G', 0, 1, 0);						//在G抓取
 			Run(1, 750, MVEL);							//去D

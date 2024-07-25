@@ -1,13 +1,12 @@
 #include "motorencoder.h"
 
 int LTargetVelocity, RTargetVelocity, LTargetVelocity_f, RTargetVelocity_f; //目标速度
-float LTargetCircle, RTargetCircle;								//目标圈数(位置)  一圈20.5cm
+float LTargetCircle, RTargetCircle;								//目标圈数(位置)
 int LCurrentPosition, RCurrentPosition, LCurrentPosition_V, RCurrentPosition_V;
 int LEncoder, REncoder;														//编码器读数
 int LPWM, RPWM; 																	//PWM 控制变量
 float Velcity_Kp = 1, Velcity_Ki = 0.5, Velcity_Kd; 							//相关速度 PID 参数
 float Position_Kp = 0.25, Position_Ki = 0.02, Position_Kd = 1; 		//相关位置 PID 参数
-float Fudu = 1000.0;     //加减速幅度  加减速圈数约等于目标速度除以加减速幅度
 int n_Fudu;
 int flag_fudu;
 int LStartMinV, RStartMinV; //初始最小速度为目标速度的五分之一
@@ -33,7 +32,7 @@ MotorState_t MotorState = Stop;									//默认停车
   */
 void Motor_Run(uint8_t dir, uint16_t vel) {
 	MotorState = Velocity_Xunji;
-	flag_fudu = 0;
+	flag_fudu = 1;
 	switch (dir) {
 		case 0: {
 			LTargetVelocity_f = -vel;
@@ -61,7 +60,7 @@ void Motor_Run(uint8_t dir, uint16_t vel) {
   */
 void Con_Stop(float dis) {
 	MotorState = VelCir;
-	flag_fudu = 0;
+	flag_fudu = 1;
 	if (LTargetVelocity_f < 0) {
 		LTargetCircle = -1.0 * dis / (2 * PI * Radius);
 		RTargetCircle = -LTargetCircle;
@@ -94,6 +93,53 @@ void Run(uint8_t dir, float dis, uint16_t vel) {
 	}
 }
 
+/**
+  * @brief  设置加速度幅度
+  * @prarm  Accel_1		第一段加速的幅度
+  * @prarm  Accel_2		其余段加速的幅度
+  * @retval 无
+	* @note		加速圈数 约等于 目标速度 / 加速幅度
+  */
+void AC_Vel() {
+	if (n_Fudu) {
+		LCurrentPosition_V += LEncoder;
+		LTargetVelocity = Accel_1 * LCurrentPosition_V / 54000 + LStartMinV;
+		RTargetVelocity = - LTargetVelocity;
+	} else {
+		LCurrentPosition_V += LEncoder;
+		LTargetVelocity = Accel_2 * LCurrentPosition_V / 54000 + LStartMinV;
+		RTargetVelocity = - LTargetVelocity;
+	}
+	if (abs(LTargetVelocity) >= abs(LTargetVelocity_f)) {
+		n_Fudu = 0;
+		LTargetVelocity = LTargetVelocity_f;
+		RTargetVelocity = RTargetVelocity_f;
+	}
+
+}
+
+/**
+  * @brief  设置减速度幅度
+  * @prarm  Dccel		减速的幅度
+  * @retval 无
+	* @note		减速圈数 约等于 目标速度 / 减速幅度
+  */
+void DC_Vel() { //减速幅度  减速圈数约等于目标速度除以减速幅度
+
+	if (Dccel * (fabs(LTargetCircle) - abs(LCurrentPosition) / 54000) < abs(LTargetVelocity_f)) {
+		LTargetVelocity = Dccel * (LTargetCircle - LCurrentPosition / 54000.0);
+		RTargetVelocity = -LTargetVelocity;
+		if (abs(Accel_2 * LCurrentPosition_V / 54000 + LStartMinV) <= abs(LTargetVelocity)) {
+			LTargetVelocity = Accel_2 * LCurrentPosition_V / 54000 + LStartMinV;
+			RTargetVelocity = -LTargetVelocity;
+		}
+		if (abs(LTargetVelocity) <= abs(LStartMinV)) {
+			LTargetVelocity = LStartMinV;
+			RTargetVelocity = RStartMinV;
+		}
+	}
+}
+
 /**************************************************************************
 函数功能：TIM6 中断服务函数 定时读取编码器数值并进行速度闭环控制 10ms进入一次
 入口参数：无
@@ -104,36 +150,10 @@ void TIM6_IRQHandler() {
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) == 1) { //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 		LEncoder = LRead_Encoder();   		//读取当前编码器读数，即速度
 		REncoder = RRead_Encoder();   		//读取当前编码器读数，即速度
-		if (flag_fudu == 0) {
-			if (n_Fudu == 1) {
-				LCurrentPosition_V += LEncoder;
-				LTargetVelocity = (Fudu + 2000) * LCurrentPosition_V / 54000 + LStartMinV;
-				RTargetVelocity = -LTargetVelocity;
-			} else {
-				LCurrentPosition_V += LEncoder;
-				LTargetVelocity = Fudu * LCurrentPosition_V / 54000 + LStartMinV;
-				RTargetVelocity = -LTargetVelocity;
-			}
-			if (abs(LTargetVelocity) >= abs(LTargetVelocity_f) || abs(RTargetVelocity) >= abs(RTargetVelocity_f)) {
-				n_Fudu = 0;
-				LTargetVelocity = LTargetVelocity_f;
-				RTargetVelocity = RTargetVelocity_f;
-			}
-			if (MotorState == VelCir) {
-				if (Fudu * (fabs(LTargetCircle) - 1.0 * abs(LCurrentPosition) / 54000) < abs(LTargetVelocity_f) || Fudu * (fabs(RTargetCircle) - 1.0 * abs(RCurrentPosition) / 54000) < abs(RTargetVelocity_f)) {
-
-					LTargetVelocity = Fudu * (LTargetCircle - 1.0 * LCurrentPosition / 54000);
-					RTargetVelocity = -LTargetVelocity;
-					if (fabs(Fudu * LCurrentPosition_V / 54000 + LStartMinV) <= fabs(Fudu * (LTargetCircle - 1.0 * LCurrentPosition / 54000))) {
-						LTargetVelocity = Fudu * LCurrentPosition_V / 54000 + LStartMinV;
-						RTargetVelocity = -LTargetVelocity;
-					}
-					if (abs(LTargetVelocity) <= abs(LStartMinV)) {
-						LTargetVelocity = LStartMinV;
-						RTargetVelocity = RStartMinV;
-					}
-				}
-			}
+		if (flag_fudu) {
+			AC_Vel();										//设置加速度幅度
+			if (MotorState == VelCir)
+				DC_Vel();									//设置减速度幅度
 		}
 		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis全局变量往后修改
 		if (Sensor_open)
@@ -147,13 +167,12 @@ void TIM6_IRQHandler() {
 				LCurrentPosition = 0;
 				RCurrentPosition = 0;
 
-				flag_fudu = 1;
+				flag_fudu = 0;
 				LCurrentPosition_V = 0;
 
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-				SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
-				//一直加到65536后，pwm会被自动置0  因为l298n的定时器
+				SetPWM(LPWM, RPWM);
 				break;
 			}
 			case Velocity_Xunji: {
@@ -163,21 +182,21 @@ void TIM6_IRQHandler() {
 				RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-				SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
+				SetPWM(LPWM, RPWM);
 				break;
 			}
 			/*----速度环 + 位置环----*/
 			case VelCir: {
 				static int LPWM_P, LPWM_V, RPWM_P, RPWM_V; 				//速度位置串级 PID 控制变量 PWM_P、PWM_V
-				//static int TimeCount;
 
 				LCurrentPosition += LEncoder; 	//编码器读数(速度)积分得到位置
 				RCurrentPosition += REncoder; 	//编码器读数(速度)积分得到位置
 
-				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) {
+				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0){ 	//当编码器读数为0即为停车
 					LTargetVelocity_f = 0;
 					RTargetVelocity_f = 0;
 					MotorState = Stop;
+					puts("stopFlag");
 				}
 
 				LPWM_P = LPosition_FeedbackControl(LTargetCircle, LCurrentPosition); //位置闭环控制
@@ -185,18 +204,16 @@ void TIM6_IRQHandler() {
 				LPWM_V = LPWM_P / 2; //位置环输出的 PWM 值按一定比例转换为速度值，接下来使用该速度值进行速度闭环控制。
 				//空载时，电源适配器供电情况下，每 76PWM 约等于 1 编码器速度（后期还需要改动）
 				LPWM = LVelocity_FeedbackControl(LPWM_V, LEncoder); //速度环闭环控制 相当于位置环的输出为速度环的输入，形成串级 PID
+
 				RPWM_P = RPosition_FeedbackControl(RTargetCircle, RCurrentPosition); //位置闭环控制
 				RPWM_P = Velocity_Restrict(RPWM_P, abs(RTargetVelocity)); //限幅位置环输出的 PWM
 				RPWM_V = RPWM_P / 2; //位置环输出的 PWM 值按一定比例转换为速度值，接下来使用该速度值进行速度闭环控制。
 				//空载时，电源适配器供电情况下，每 76PWM 约等于 1 编码器速度（后期还需要改动）
 				RPWM = RVelocity_FeedbackControl(RPWM_V, REncoder); //速度环闭环控制 相当于位置环的输出为速度环的输入，形成串级 PID
 				SetPWM(LPWM, RPWM); //设置 PWM
-
 				break;
 			}
-
 		}
-
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); 			//清除中断标志位，状态寄存器(TIMx_SR)的bit0置0
 	}
 
@@ -360,8 +377,8 @@ void TIM6_Init() {
 
 	NVIC_InitStrue.NVIC_IRQChannel = TIM6_IRQn; //属于TIM2中断
 	NVIC_InitStrue.NVIC_IRQChannelCmd = ENABLE; //中断使能
-	NVIC_InitStrue.NVIC_IRQChannelPreemptionPriority = 0; //抢占优先级为1级，值越小优先级越高，0级优先级最高
-	NVIC_InitStrue.NVIC_IRQChannelSubPriority = 0; //响应优先级为1级，值越小优先级越高，0级优先级最高【【【TIM6的中断优先级应高于TIM5，否则会出现卡顿】】】
+	NVIC_InitStrue.NVIC_IRQChannelPreemptionPriority = 1; //抢占优先级为1级，值越小优先级越高，0级优先级最高
+	NVIC_InitStrue.NVIC_IRQChannelSubPriority = 1; //响应优先级为1级，值越小优先级越高，0级优先级最高【【【TIM6的中断优先级应高于TIM5，否则会出现卡顿】】】
 	NVIC_Init(&NVIC_InitStrue); //根据NVIC_InitStrue的参数初始化VIC寄存器，设置TIM2中断
 
 	TIM_Cmd(TIM6, ENABLE); //使能定时器TIM2
