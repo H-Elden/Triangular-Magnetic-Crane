@@ -66,8 +66,8 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	PointDis[3][0] = 670 + 1192.5 - 20;		//H线。木桩子提前测
-	PointDis[4][0] = -3300;								//I线
+	PointDis[3][0] = 670 + 1192.5 - 100;	//H线。木桩子提前测
+	PointDis[4][0] = -3100;								//I线
 
 	for (u8 i = 0; i < 3; i++) {
 		PointDis[i][1] = PointDis[i][0] + 30;					//截止线

@@ -50,7 +50,6 @@ int main() {
 			printf("×ÜÓÃÊ±£º\r\n\t%.1fs\r\n",(timer - Start)/10.0);
 		}
 		delay_ms(10);
-		
 	}
 }
 

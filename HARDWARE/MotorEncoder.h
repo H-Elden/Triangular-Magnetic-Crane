@@ -9,7 +9,7 @@
 #define Radius 32.3					//单位毫米
 #define MVEL 2000						//行进电机速度
 #define Accel 1500.0
-#define Dccel 800.0
+#define Dccel 1000.0
 
 typedef enum {
 	Stop,								//停止

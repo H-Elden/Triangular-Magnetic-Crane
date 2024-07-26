@@ -11,6 +11,7 @@ int Fudu_flag = 0;
 int Run_flag = 0;
 int Velocity_temp;
 int Velocity_flag;
+int MVEL_flag = 0;
 int LStartMinV, RStartMinV; //初始最小速度为目标速度的五分之一
 float ZhongZhi; 		//单轴陀螺仪定义走直中值
 
@@ -35,22 +36,22 @@ MotorState_t MotorState = Stop;		//默认停车
   */
 void Motor_Run(uint8_t dir, uint16_t vel) {
 	puts("Motor_Run");
-    Velocity_flag = 1;
-    Fudu_flag = 1;
+	Velocity_flag = 1;
+	Fudu_flag = 1;
 	MotorState = Velocity_Xunji;
 	switch (dir) {
 		case 0: {
 			LTargetVelocity_f = -vel;
-            LStartMinV = -vel / 5;
+			LStartMinV = -vel / 5;
 			RTargetVelocity_f = -LTargetVelocity_f;
-            RStartMinV = -LStartMinV;
+			RStartMinV = -LStartMinV;
 			break;
 		}
 		case 1: {
 			LTargetVelocity_f = vel;
-            LStartMinV = vel / 5;
+			LStartMinV = vel / 5;
 			RTargetVelocity_f = -LTargetVelocity_f;
-            RStartMinV = -LStartMinV;
+			RStartMinV = -LStartMinV;
 			break;
 		}
 	}
@@ -82,8 +83,8 @@ void Con_Stop(float dis) {
 	* @note		这段距离包含加减速的过程，在dis内准确停车
   */
 void Run(uint8_t dir, float dis, uint16_t vel) {
-	printf("Run %.1f mm\r\n",dis);
-    Run_flag = 1;
+	printf("Run %.1f mm\r\n", dis);
+	Run_flag = 1;
 	switch (dir) {
 		case 0: {
 			Motor_Run(0, vel);
@@ -99,34 +100,37 @@ void Run(uint8_t dir, float dis, uint16_t vel) {
 	}
 }
 void Speed_UP(float accel) {
-    
-    LTargetVelocity = accel * LCurrentPosition_V / 54000 + LStartMinV;
-    RTargetVelocity = - LTargetVelocity;
-    if (abs(LTargetVelocity) >= abs(LTargetVelocity_f)) 
-    {
-        LTargetVelocity = LTargetVelocity_f;
-        RTargetVelocity = RTargetVelocity_f;
-    }
+
+	LTargetVelocity = accel * LCurrentPosition_V / 54000 + LStartMinV;
+	RTargetVelocity = - LTargetVelocity;
+	if (abs(LTargetVelocity) >= abs(LTargetVelocity_f)) {
+        if(Run_flag)
+            MVEL_flag = 1;
+		LTargetVelocity = LTargetVelocity_f;
+		RTargetVelocity = RTargetVelocity_f;
+	}
 }
 
 void Speed_DOWN(float dccel) {
-    if(Velocity_flag)
-    {
-        Velocity_temp = (abs(LTargetVelocity) + abs(RTargetVelocity)) / 2;
-        Velocity_flag = 0;
-    }
-    if(LTargetVelocity_f > 0)
-        LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
-    else
-        LTargetVelocity = -Velocity_temp + fabs(dccel * LCurrentPosition_V / 54000);
+	if (Velocity_flag) {
+		Velocity_temp = (abs(LTargetVelocity) + abs(RTargetVelocity)) / 2;
+		Velocity_flag = 0;
+		LCurrentPosition_V = 0;
+	}
+    if(Run_flag && MVEL_flag)
+        dccel -= 700;
+	if (LTargetVelocity_f > 0) {
+		LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
+	} else {
+		LTargetVelocity = -Velocity_temp + fabs(dccel * LCurrentPosition_V / 54000);
+	}
 
-        RTargetVelocity = -LTargetVelocity;
+	RTargetVelocity = -LTargetVelocity;
+	if (abs(LTargetVelocity) < abs(LStartMinV)) {
+		LTargetVelocity = LStartMinV;
+		RTargetVelocity = RStartMinV;
+	}
 
-    if (abs(LTargetVelocity) <= abs(LStartMinV)) 
-    {
-        LTargetVelocity = LStartMinV;
-        RTargetVelocity = RStartMinV;
-    }
 }
 /**************************************************************************
 函数功能：TIM6 中断服务函数 定时读取编码器数值并进行速度闭环控制 10ms进入一次
@@ -138,23 +142,19 @@ void TIM6_IRQHandler() {
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) == 1) { //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 		LEncoder = LRead_Encoder();   		//读取当前编码器读数，即速度
 		REncoder = RRead_Encoder();   		//读取当前编码器读数，即速度
-        if(Fudu_flag)
-        {
-            LCurrentPosition_V += LEncoder;
-            if(Run_flag)
-            {
-                if(fabs(1.0*LCurrentPosition_V / 54000) < fabs(LTargetCircle / 2))
-                    Speed_UP(Accel);
-                else
-                    Speed_DOWN(Accel);//这个幅度必须和加速幅度一样
-            }
-            else
-            {
-                Speed_UP(Accel);
-                if(MotorState == VelCir)
-                    Speed_DOWN(Dccel);
-            }
-        }
+		if (Fudu_flag) {
+			LCurrentPosition_V += LEncoder;
+			if (Run_flag) {
+				if (fabs(1.0 * LCurrentPosition / 54000) < fabs(LTargetCircle / 2))
+					Speed_UP(Accel);
+				else
+					Speed_DOWN(Accel);//这个幅度必须和加速幅度一样
+			} else {
+				Speed_UP(Accel);
+				if (MotorState == VelCir)
+					Speed_DOWN(Dccel);
+			}
+		}
 		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis全局变量往后修改
 		if (Sensor_open)
 			Getdis();
@@ -170,9 +170,10 @@ void TIM6_IRQHandler() {
 				LCurrentPosition = 0;
 				RCurrentPosition = 0;
 
-                Run_flag = 0;
-                Fudu_flag = 0;
-                LCurrentPosition_V = 0;
+				Run_flag = 0;
+				Fudu_flag = 0;
+                MVEL_flag = 0;
+				LCurrentPosition_V = 0;
 
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
 				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
@@ -181,25 +182,24 @@ void TIM6_IRQHandler() {
 				break;
 			}
 			case Velocity_Xunji: {
-                    Gyro_read();
+				Gyro_read();
 //					printf("%d    %.3f\r\n", Turn(fAngle[2]), fAngle[2]);
-                	LTargetVelocity = LTargetVelocity - Turn(fAngle[2]);
-					RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
-					LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
-					RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
-					SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
+				LTargetVelocity = LTargetVelocity - Turn(fAngle[2]);
+				RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
+				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
+				RPWM = RVelocity_FeedbackControl(RTargetVelocity, REncoder); 		//速度环闭环控制
+				SetPWM(LPWM, RPWM); 				//设置PWM  若现在速度一直达不到目标速度，则pwm数值累加
 				break;
 			}
 			/*----速度环 + 位置环----*/
 			case VelCir: {
 				static int LPWM_P, LPWM_V, RPWM_P, RPWM_V; 				//速度位置串级 PID 控制变量 PWM_P、PWM_V
 				//static int TimeCount;
-				
+
 				LCurrentPosition += LEncoder; 	//编码器读数(速度)积分得到位置
 				RCurrentPosition += REncoder; 	//编码器读数(速度)积分得到位置
-				
-				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) //当编码器读数为0即为停车
-				{
+
+				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) { //当编码器读数为0即为停车
 					MotorState = Stop;
 					puts("stopFlag");
 				}
@@ -499,8 +499,8 @@ int Velocity_Restrict(int PWM_P, int TargetVelocity) {
 作    者：平衡小车之家
 **************************************************************************/
 int Turn(float YAW) { //转向控制
-	float Bias; 
-    int Kp = 500, Kd = 2000;
+	float Bias;
+	int Kp = 500, Kd = 2000;
 	static float Turn, Last_Bias;
 	Bias = YAW - ZhongZhi;
 //    Integral_Bias+=Bias;

@@ -13,8 +13,8 @@
 #define TIMER_ENABLE	1				//是否采用计时的方法判断步进停止
 #define TIMER_MEASURE	0				//是否要测量计时的数据
 
-#define SVEL 250							//设置步进的速度
-#define SACC 220							//设置步进的加速度
+#define SVEL 300							//设置步进的速度
+#define SACC 230							//设置步进的加速度
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -40,13 +40,13 @@
 
 #if TIMER_ENABLE
 
-/* 基于速度SVEL = 250 加速度SACC = 220 的测量结果如下 */
-#define TIME_S1		14
-#define TIME_S2		18
-#define TIME_S2_1	7
-#define TIME_C1		7
-#define TIME_C2		11
-#define TIME_Z0		8
+/* 基于速度SVEL = 300 加速度SACC = 230 的测量结果如下 */
+#define TIME_S1		12
+#define TIME_S2		15
+#define TIME_S2_1	6
+#define TIME_C1		6
+#define TIME_C2		9
+#define TIME_Z0		7
 
 #endif	/* TIMER_ENABLE */
 
