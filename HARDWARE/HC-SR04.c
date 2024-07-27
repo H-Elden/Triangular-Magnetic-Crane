@@ -23,6 +23,8 @@ uint8_t isStop;
 float dist[4];
 
 
+u8 eff = 3;
+
 /**
   * @brief  基本定时器7初始化函数
   * @prarm  无
@@ -145,8 +147,9 @@ void EXTI_Sensor(uint8_t i) {
 		else
 			dist[i] = 0.0001 * cnt * 340 / 2 ;	//单位cm
 		printf("dis %d = %.3f\r\n", i, dist[i]);
+
 		//近15次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)不少于3次 就 停车
-		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3) {
+		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= eff) {
 			//关闭传感器 + 置零测距值
 			SensorOFF(i);
 			printf("%d dis = %.2f\n", i, dist[i]);
