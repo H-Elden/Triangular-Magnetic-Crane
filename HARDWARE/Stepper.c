@@ -116,15 +116,15 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 	// 发送命令
 	usart3_SendCmd(cmd, 13);
 	puts("Stepper Turn");
-	while (rxFrameFlag == false);
-	rxFrameFlag = false;										// 清除接收标志
-	while(!rxCmd[1]){
-		printf("%02d move error: ",addr);
-		Print_RxCmd();												// 打印错误信息
-		usart3_SendCmd(cmd, 13);
-		while (rxFrameFlag == false);
-		rxFrameFlag = false;									// 清除接收标志
-	}
+//	while (rxFrameFlag == false);
+//	rxFrameFlag = false;										// 清除接收标志
+//	while(!rxCmd[1]){
+//		printf("%02d move error: ",addr);
+//		Print_RxCmd();												// 打印错误信息
+//		usart3_SendCmd(cmd, 13);
+//		while (rxFrameFlag == false);
+//		rxFrameFlag = false;									// 清除接收标志
+//	}
 	printf("%02d move\r\n",addr);
 	
 	

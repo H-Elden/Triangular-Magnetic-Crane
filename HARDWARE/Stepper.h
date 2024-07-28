@@ -38,7 +38,7 @@
 #define S2 2080
 #define C1 500
 #define C2 1000
-#define Z0 600
+#define Z0 550
 
 #if TIMER_ENABLE
 

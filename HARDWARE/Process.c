@@ -126,10 +126,10 @@ void CLine() {
 		//先向外移动到S1
 		if (obj[1])		Stepper_Turn(1, WAI1, S1);
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
-		while (MotorState != Stop);	//阻塞等待 车子停稳
+		while (MotorState != Stop);				//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
-		if(obj[1] && obj[2])				//防止撞到D木桩
-			delay_ms(500);
+		if(obj[1] && obj[2])							
+			delay_ms(800);									//防止撞倒木桩
 		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
 			while(Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
@@ -266,11 +266,12 @@ void ELine0() {
 void HLine() {
 	puts("");
 	puts("----- H Line -----");
+	/*
 	LED_GREEN = 1;		//开左传感器关绿灯
 	puts("H ON 1");
 	isStore = 0;			//不需要存储信息
 	isStop = 1;
-	Con_Dis = 2205;
+	Con_Dis = 2205 + 10;
 	SetGoaldis(1, 45, 55);
 	SensorON(1);
 	while (MotorState == Velocity_Xunji);
@@ -278,6 +279,7 @@ void HLine() {
 	Sensor_open = 0;
 	LED_GREEN = 1;		//关灯重置
 	puts("H Close 1");
+	*/
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 	puts("H STOP");
 	Run_Dis = 0;			//置零，回程距离为负
@@ -336,7 +338,7 @@ void Back() {
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		} else if (obj[3] && obj[4]) {
 			Catch('F', 0, 1, 0);						//在F抓取
-			delay_ms(500);									//防止撞倒木桩
+			delay_ms(800);									//防止撞倒木桩
 			Run(1, 375, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}
@@ -373,18 +375,20 @@ void Back() {
 void ILine() {
 	puts("");
 	puts("----- I Line -----");
+	/*
 	puts("I ON 3");
 	SetGoaldis(3, 40, 60);
 	SensorON(3);
 	isStore = 0;									//不存储砝码信息
 	isStop = 1;
-	Con_Dis = -3510;
+	Con_Dis = -3510 - 10;
 	while (MotorState == Velocity_Xunji);
 	delay_ms(200);
 	Sensor_open = 0;
 	LED_GREEN = 1;								//关灯重置
 	dist[3] = 0;
 	puts("I Close 3");
+	*/
 	while (MotorState != Stop);		//阻塞等待 车子停稳
 	puts("I STOP");
 	Place_Side();

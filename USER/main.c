@@ -56,11 +56,13 @@ int main() {
 		//H线：放置
 		else if (only[3] == 0 && Run_Dis >= PointDis[3][0]) {
 			only[3] = 1;
+			Con_Stop(2205 + 5 - Run_Dis);
 			HLine();
 		}
 		//I线：放置
 		else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
 			only[4] = 1;
+			Con_Stop(Run_Dis + 3510 + 5);
 			ILine();
 			puts("-----END-----");
 			printf("总用时：\r\n\t%.1fs\r\n",(timer - Start)/10.0);
