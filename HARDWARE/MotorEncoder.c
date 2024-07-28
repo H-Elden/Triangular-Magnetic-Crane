@@ -42,14 +42,14 @@ void Motor_Run(uint8_t dir, uint16_t vel) {
 	switch (dir) {
 		case 0: {
 			LTargetVelocity_f = -vel;
-			LStartMinV = -vel / 5;
+			LStartMinV = -vel / 4;
 			RTargetVelocity_f = -LTargetVelocity_f;
 			RStartMinV = -LStartMinV;
 			break;
 		}
 		case 1: {
 			LTargetVelocity_f = vel;
-			LStartMinV = vel / 5;
+			LStartMinV = vel / 4;
 			RTargetVelocity_f = -LTargetVelocity_f;
 			RStartMinV = -LStartMinV;
 			break;
@@ -148,7 +148,7 @@ void TIM6_IRQHandler() {
 				if (fabs(1.0 * LCurrentPosition / 54000) < fabs(LTargetCircle / 2))
 					Speed_UP(Accel);
 				else
-					Speed_DOWN(Accel);//这个幅度必须和加速幅度一样
+					Speed_DOWN(Accel - 200);//这个幅度必须和加速幅度一样
 			} else {
 				Speed_UP(Accel);
 				if (MotorState == VelCir)

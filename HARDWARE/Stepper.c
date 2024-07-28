@@ -5,6 +5,8 @@
 volatile uint32_t timer = 0;
 uint32_t close_time[6];		//关闭步进的时间点
 
+u8 weight[3];			//抓手是否带负载
+
 void TIM5_Init(void) {
 	// 启动时钟
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
@@ -85,8 +87,17 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 	uint8_t cmd[13] = {0};
 	//脉冲数 = 角度 / 步进角（1.8） * 细分数（16）
 	uint32_t clk = angle / 1.8 * 16;
-	uint16_t vel = SVEL;
-	uint8_t acc = SACC;
+	uint16_t vel;
+	uint8_t acc;
+	if(addr == 1 || addr == 2){			//水平运动
+		vel = SVEL_S;
+		acc = SACC_S;
+	}
+	else{														//垂直运动
+		vel = SVEL_C;
+		acc = SACC_C;	
+	}
+
 	// 装载命令
 	cmd[0]  =  addr;                      // 地址
 	cmd[1]  =  0xFD;                      // 功能码
@@ -128,12 +139,12 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 			close_time[addr] = timer + TIME_S2_1;
 	}
 	else{
-		if(angle == C1)
-			close_time[addr] = timer + TIME_C1;
-		else if(angle == C2)
-			close_time[addr] = timer + TIME_C2;
+		if(angle == C1 || angle == C1 - 5)
+			close_time[addr] = weight[addr - 3] ? timer + TIME_C1_W : timer + TIME_C1;
+		else if(angle == C2 || angle == C2 - 5)
+			close_time[addr] = weight[addr - 3] ? timer + TIME_C2_W : timer + TIME_C2;
 		else if(angle == Z0)
-			close_time[addr] = timer + TIME_Z0;
+			close_time[addr] = weight[addr - 3] ? timer + TIME_Z0_W : timer + TIME_Z0;
 	}
 #endif
 }
@@ -160,7 +171,7 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 
 	if (rxCmd[1]) {
 		if (rxCmd[2] & 0x02) {
-			printf("%d Stepper Stop\r\n", addr);
+			//printf("%d Stepper Stop\r\n", addr);
 			return 0;				// 电机旋转到位
 		}
 		return 1;														// 电机旋转未到位
@@ -297,13 +308,41 @@ void Stepper_TimerINIT(){
 		t[i] >>= 2;
 	/* 输出测量结果 */
 	printf("----- 测量完成！ -----\r\n");
-	printf("/* 基于速度SVEL = %d 加速度SACC = %d 的测量结果如下 */\r\n", SVEL, SACC);
+	printf("/* 基于\r\n速度SVEL_S = %d SVEL_C = %d\r\n加速度SACC_S = %d SACC_C = %d\r\n的测量结果如下 */\r\n", SVEL_S, SVEL_C, SACC_S, SACC_C);
 	printf("#define TIME_S1\t\t%d\r\n",t[0]);
 	printf("#define TIME_S2\t\t%d\r\n",t[1]);
 	printf("#define TIME_S2_1\t%d\r\n",t[2]);
 	printf("#define TIME_C1\t\t%d\r\n",t[3]);
 	printf("#define TIME_C2\t\t%d\r\n",t[4]);
 	printf("#define TIME_Z0\t\t%d\r\n",t[5]);
+}
+
+//带负载上升时间测量
+void Stepper_TimerINIT2(){
+	u32 temp;
+	/* TIME_C1_W */
+	temp = timer;
+	Stepper_Turn(3,UP3,C1);
+	Stepper_Turn(4,UP4,C1);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	printf("#define TIME_C1_W\t%d\r\n",timer - temp);
+
+	Stepper_Turn(3,DOWN3,C1);
+	Stepper_Turn(4,DOWN4,C1);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	
+	/* TIME_C2_W */
+	temp = timer;
+	Stepper_Turn(3,UP3,C2);
+	Stepper_Turn(4,UP4,C2);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	printf("#define TIME_C2_W\t%d\r\n",timer - temp);
+	
+	/* TIME_Z0_W */
+	temp = timer;
+	Stepper_Turn(5,UP0,Z0);
+	while(Stepper_GetStatus(5));															//阻塞等待停止	
+	printf("#define TIME_Z0_W\t%d\r\n",timer - temp);
 }
 #endif	/* TIMER_MEASURE */
 

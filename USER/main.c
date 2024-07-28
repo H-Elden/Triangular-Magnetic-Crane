@@ -12,18 +12,19 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	puts("-----BEGIN-----");
-	
-//	Stepper_Turn(3, UP3, C1);
-//	while(Stepper_GetStatus(3));
-//	Stepper_Turn(3, DOWN3, C1);
-//	while(Stepper_GetStatus(3));
-//	MagnetON(1);
+//	Stepper_Turn(4, UP4, C2);
+//	while(Stepper_GetStatus(4));
+//	Stepper_Turn(4, DOWN4, C2);
+//	while(Stepper_GetStatus(4));
+//	MagnetON(2);
 //	delay_ms(50);
-//	Stepper_Turn(3, UP3, C1);
-//	while(Stepper_GetStatus(3));
-//	Stepper_Turn(3, DOWN3, C1);
-//	while(Stepper_GetStatus(3));
-//	MagnetOFF(1);
+//	weight[1] = 1;
+//	Stepper_Turn(4, UP4, C2);
+//	while(Stepper_GetStatus(4));
+//	weight[1] = 0;
+//	Stepper_Turn(4, DOWN4, C2);
+//	while(Stepper_GetStatus(4));
+//	MagnetOFF(2);
 //	delay_ms(50);
 
 	u32 Start = timer;							//记下程序开始的时间
@@ -35,7 +36,6 @@ int main() {
 	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
 	
 	while (1) {
-	
 		//B线：识别
 		if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
 			only[0] = 1;
@@ -66,7 +66,6 @@ int main() {
 			printf("总用时：\r\n\t%.1fs\r\n",(timer - Start)/10.0);
 		}
 		delay_ms(10);
-		
 	}
 }
 

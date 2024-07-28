@@ -13,8 +13,10 @@
 #define TIMER_ENABLE	1				//是否采用计时的方法判断步进停止
 #define TIMER_MEASURE	0				//是否要测量计时的数据
 
-#define SVEL 400							//设置步进的速度
-#define SACC 240							//设置步进的加速度
+#define SVEL_C 400						//设置垂直步进的速度
+#define SACC_C 240						//设置垂直步进的加速度
+#define SVEL_S 400						//设置水平步进的速度
+#define SACC_S 230						//设置水平步进的加速度
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -40,13 +42,23 @@
 
 #if TIMER_ENABLE
 
-/* 基于速度SVEL = 400 加速度SACC = 240 的测量结果如下 */
-#define TIME_S1		9
-#define TIME_S2		11
-#define TIME_S2_1	5
+/* 基于
+速度SVEL_S = 400 SVEL_C = 400
+加速度SACC_S = 230 SACC_C = 240
+的测量结果如下 */
+#define TIME_S1		11
+#define TIME_S2		13
+#define TIME_S2_1	6
 #define TIME_C1		5
 #define TIME_C2		7
 #define TIME_Z0		5
+//带负载垂直上升
+#define TIME_C1_W	13
+#define TIME_C2_W	22
+#define TIME_Z0_W	17
+
+extern u8 weight[3];			//抓手是否带负载
+
 
 #endif	/* TIMER_ENABLE */
 
@@ -73,6 +85,7 @@ extern volatile uint32_t timer;
 #endif
 #if TIMER_MEASURE
 void Stepper_TimerINIT(void);
+void Stepper_TimerINIT2(void);
 #endif	/* TIMER_MEASURE */
 
 void Print_RxCmd(void);

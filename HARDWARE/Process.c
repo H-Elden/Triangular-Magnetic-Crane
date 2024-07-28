@@ -128,6 +128,8 @@ void CLine() {
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
 		while (MotorState != Stop);	//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
+		if(obj[1] && obj[2])				//防止撞到D木桩
+			delay_ms(500);
 		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
 			while(Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
@@ -162,8 +164,11 @@ void DPoint() {
 		dist[1] = dist[2] = 0;
 	}
 	delay_ms(50);
-	MagnetOFF(0);										//关闭电磁铁0
+	MagnetOFF(0);						//关闭电磁铁0
 	delay_ms(50);
+#if TIMER_ENABLE
+	weight[5 - 3] = 0;							//步进5设置为不带负载
+#endif
 	Stepper_Turn(5, UP0, C1);				//步进0向上提举到一定高度
 	while (Stepper_GetStatus(5));		//等待步进电机向上移动完毕
 }
@@ -229,6 +234,7 @@ void ELine0() {
 		if(!obj[3])	Stepper_Turn(1,WAI1,S1);
 		if(!obj[4])	Stepper_Turn(2,WAI2,S1);
 		Catch('E', obj[3], 0, obj[4]);							//E抓取
+		delay_ms(500);
 		if (obj[3] && obj[4]) {
 			Motor_Run(0, MVEL);
 		} else {
@@ -294,9 +300,9 @@ void Back() {
 		obj[3] ? Stepper_Turn(1, NEI1, S2) : Stepper_Turn(1, NEI1, S2 - S1);			//步进1向内到达正确位置
 		obj[4] ? Stepper_Turn(2, NEI2, S2) : Stepper_Turn(2, NEI2, S2 - S1);			//步进2向内到达正确位置
 		(obj[3] && obj[4]) ? Run(1, 817.5, MVEL) : Run(1, 630, MVEL);							//两个都有去E，否则去F
-		delay_ms(200);										//避免抓手下降挂到砝码
-		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
-		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
+		delay_ms(500);										//避免抓手下降挂到砝码
+		Stepper_Turn(3, DOWN3, C2 - 5);		//步进3向下预先放到抓取高度
+		Stepper_Turn(4, DOWN4, C2 - 5);		//步进4向下预先放到抓取高度
 		while (MotorState != Stop);
 		if (!obj[3] || !obj[4]) {					//先去F抓
 			Catch('F', !obj[3], 0, !obj[4]);
@@ -318,9 +324,9 @@ void Back() {
 			Run(1, 630, MVEL);							//去F抓
 		else
 			Run(1, 1005, MVEL);							//去D
-		delay_ms(200);										//避免抓手下降挂到砝码
-		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
-		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
+		delay_ms(500);										//避免抓手下降挂到砝码
+		Stepper_Turn(3, DOWN3, C2 - 5);		//步进3向下预先放到抓取高度
+		Stepper_Turn(4, DOWN4, C2 - 5);		//步进4向下预先放到抓取高度
 		while (MotorState != Stop){				//阻塞等待 车子停稳
 			printf("-");
 		}
@@ -330,6 +336,7 @@ void Back() {
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		} else if (obj[3] && obj[4]) {
 			Catch('F', 0, 1, 0);						//在F抓取
+			delay_ms(500);									//防止撞倒木桩
 			Run(1, 375, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}
@@ -428,6 +435,12 @@ void Catch(char Line, u8 odd, u8 mid, u8 even) {
 	if (mid)	MagnetON(0);											//打开电磁铁0
 	delay_ms(50);
 
+#if TIMER_ENABLE
+	if (odd)	weight[3 - 3] = 1;										//步进3设置为带负载
+	if (even)	weight[4 - 3] = 1;										//步进4设置为带负载
+	if (mid)	weight[5 - 3] = 1;										//步进5设置为带负载
+#endif
+
 	if (odd)	Stepper_Turn(3, UP3, C2);					//先上升
 	if (even)	Stepper_Turn(4, UP4, C2);					//先上升
 	if (mid)	Stepper_Turn(5, UP0, Z0);					//先上升
@@ -440,13 +453,15 @@ void Place_Side() {
 	puts("Place");
 	//等待步进电机移动完毕
 	while (Stepper_GetStatus(1) || Stepper_GetStatus(2) || Stepper_GetStatus(3) || Stepper_GetStatus(4));
-
+#if TIMER_ENABLE
+	weight[0] = weight[1] = 0;			//3、4号电机均设置为不带负载
+#endif
 	delay_ms(50);
 	MagnetOFF(1);										//关闭电磁铁1
 	MagnetOFF(2);										//关闭电磁铁2
 	delay_ms(50);
 
-	Stepper_Turn(3, UP3, C1);				//步进3向上提举，脱离砝码
-	Stepper_Turn(4, UP4, C1);				//步进4向上提举，脱离砝码
+	Stepper_Turn(3, UP3, C1 - 5);		//步进3向上提举，脱离砝码
+	Stepper_Turn(4, UP4, C1 - 5);		//步进4向上提举，脱离砝码
 	while (Stepper_GetStatus(3) || Stepper_GetStatus(4));		//等待步进电机向上移动完毕
 }
