@@ -28,20 +28,18 @@
 #include "led.h"
 #include "Process.h"
 
-#define CYCLES 15						//循环次数，即统计近多少次的超声波数据，范围[0,32)
+#define CYCLES 10						//循环次数，即统计近多少次的超声波数据，范围[0,32)
 
 extern uint8_t Sensor_open;
-extern uint32_t ones[4];
-
-extern u8 eff;
+extern uint32_t ones[3];
 
 //内联函数的定义直接写在头文件内
 static inline void SensorON(u8 i) {ones[i] = 0; Sensor_open |= (1 << i);}				//开启第i个传感器
 static inline void SensorOFF(u8 i) {Sensor_open &= ~(1 << i);}									//关闭第i个传感器
 
-extern uint8_t obj[6];
+extern uint8_t obj[8];
 extern char isStore;
-extern float dist[4];
+extern float dist[3];
 extern uint8_t isStop;
 
 void TIM7_Init(void);

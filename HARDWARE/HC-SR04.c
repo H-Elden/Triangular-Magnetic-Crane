@@ -3,27 +3,24 @@
 #include "HC-SR04.h"
 
 /* ----- 引脚定义 ----- */
-static GPIO_TypeDef * Echo_GPIO[4] = {GPIOG, GPIOE, GPIOE, GPIOE};
-static u16 Echo_Pin[4] = {GPIO_Pin_0, GPIO_Pin_7, GPIO_Pin_9, GPIO_Pin_11};
-static GPIO_TypeDef * Trig_GPIO[4] = {GPIOG, GPIOE, GPIOE, GPIOE};
-static u16 Trig_Pin[4] = {GPIO_Pin_1, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_12};
+static GPIO_TypeDef * Echo_GPIO[3] = {GPIOG, GPIOE, GPIOE};
+static u16 Echo_Pin[3] = {GPIO_Pin_0, GPIO_Pin_7, GPIO_Pin_9};
+static GPIO_TypeDef * Trig_GPIO[3] = {GPIOG, GPIOE, GPIOE};
+static u16 Trig_Pin[3] = {GPIO_Pin_1, GPIO_Pin_8, GPIO_Pin_10};
 
 
 //超声波是否开启测距
 uint8_t Sensor_open;
 
-//超声波待测的目标距离，下标取[0,3]
-static u8 Goaldis_min[4];
-static u8 Goaldis_max[4];
+//超声波待测的目标距离，下标取[0,2]
+static u8 Goaldis_min[3];
+static u8 Goaldis_max[3];
 //第i个传感器开始测距时的定时器时间
-uint16_t Tim7_begin[4];
+uint16_t Tim7_begin[3];
 //是否要在检测到目标后就停车
 uint8_t isStop;
 
-float dist[4];
-
-
-u8 eff = 3;
+float dist[3];
 
 /**
   * @brief  基本定时器7初始化函数
@@ -54,7 +51,7 @@ void HCSR04_Init(void) {
 
 	// 配置Echo0_Pin至Echo4_Pin为输入模式
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;						//下拉输入
-	for(u8 i = 0;i < 4;i++){
+	for(u8 i = 0;i < 3;i++){
 		GPIO_InitStruct.GPIO_Pin = Echo_Pin[i];
 		GPIO_Init(Echo_GPIO[i], &GPIO_InitStruct);
 	}
@@ -62,7 +59,7 @@ void HCSR04_Init(void) {
 	// 配置Trig1_Pin至Trig4_Pin为输出模式
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;					//推挽输出
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	for(u8 i = 0;i < 4;i++){
+	for(u8 i = 0;i < 3;i++){
 		GPIO_InitStruct.GPIO_Pin = Trig_Pin[i];
 		GPIO_Init(Trig_GPIO[i], &GPIO_InitStruct);
 		Trig_GPIO[i] -> BRR = Trig_Pin[i];									// 设置初始输出电平为低电平
@@ -85,18 +82,13 @@ void HCSR04_Init(void) {
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
 	NVIC_Init(&NVIC_InitStructure);
 
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
-	NVIC_Init(&NVIC_InitStructure);
-
 	EXTI_InitTypeDef EXTI_InitStructure;
 
 	// 配置 EXTI_Line
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOG, GPIO_PinSource0);
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource7);
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource9);
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource11);
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0 | EXTI_Line7 | EXTI_Line9 | EXTI_Line11;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0 | EXTI_Line7 | EXTI_Line9;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
@@ -106,7 +98,7 @@ void HCSR04_Init(void) {
 
 
 void Getdis() {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (Sensor_open & (1 << i)) {
 			u16 delay = 72 * 20;													// 软延时，约20us
 			GPIO_SetBits(Trig_GPIO[i], Trig_Pin[i]);			// 设置为高电平
@@ -123,10 +115,10 @@ void SetGoaldis(u8 i, u8 _min, u8 _max) {
 
 /**
   * @brief  超声波传感器i的中断服务函数
-  * @prarm  i  传感器的编号[0,4]
+  * @prarm  i  传感器的编号[0,2]
   * @retval 无
   */
-uint8_t obj[6];												//i点是否存在砝码
+uint8_t obj[8];												//i点是否存在砝码，6、7号对应F线的两个砝码
 char isStore;													//存储哪条线上的砝码信息 '\0'表示不存储，'C'表示存储C线
 void EXTI_Sensor(uint8_t i) {
 	if (!(Sensor_open & (1 << i)))     //如果i传感器没开，但产生了中断，说明是电平抖动，直接return
@@ -149,14 +141,18 @@ void EXTI_Sensor(uint8_t i) {
 		printf("dis %d = %.3f\r\n", i, dist[i]);
 
 		//近15次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)不少于3次 就 停车
-		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= eff) {
+		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3) {
 			//关闭传感器 + 置零测距值
-			SensorOFF(i);
+			//SensorOFF(i);
+			Sensor_open = 0;
 			printf("%d dis = %.2f\n", i, dist[i]);
 			if (i & 1) {
+				SensorON(2);
 				LED_GREEN = 0;		//左找到开绿灯
 				puts("Green ON");
 			} else {
+				if(i)
+				SensorON(1);
 				LED_RED = 0;			//右找到开红灯
 				puts("Red ON");
 			}
@@ -168,13 +164,17 @@ void EXTI_Sensor(uint8_t i) {
 				if (!obj[0])
 					way = 1;				//中间砝码在C抓
 			} else if (isStore == 'E') {
-				if (i)
 					obj[i + 2] = 1;
+			}
+			else if(isStore == 'F') {
+				if (i)
+					obj[i + 5] = 1;
 				else {
 					obj[5] = 1;
 					return;					//防止因为测到5而停车
-				}
+				}					
 			}
+			
 			//走一段距离 + 停车
 			if (isStop) {
 				Con_Stop(fabs(Con_Dis - Run_Dis));						//继续走多少mm停车
@@ -194,9 +194,9 @@ void EXTI_Sensor(uint8_t i) {
   * @prarm  input 0表示无效，非0表示有效
   * @retval 无
   */
-uint32_t ones[4]; 													// 存储1的位数
+uint32_t ones[3]; 													// 存储1的位数
 uint8_t countEffect(uint8_t i, uint8_t input) {
-	static uint8_t pos[4]; 						// 当前输入的位置
+	static uint8_t pos[3]; 						// 当前输入的位置
 	// 每 CYCLES 个输入循环一次
 	if (pos[i] == CYCLES)		pos[i] = 0;
 	
@@ -232,12 +232,5 @@ void EXTI9_5_IRQHandler() {
 	if (EXTI_GetITStatus(EXTI_Line9) != RESET) {	//超声波2的数据:PE9
 		EXTI_ClearITPendingBit(EXTI_Line9);				//清除中断标志位
 		EXTI_Sensor(2);
-	}
-}
-
-void EXTI15_10_IRQHandler() {
-	if (EXTI_GetITStatus(EXTI_Line11) != RESET) {	//超声波3的数据:PE11
-		EXTI_ClearITPendingBit(EXTI_Line11);				//清除中断标志位
-		EXTI_Sensor(3);
 	}
 }

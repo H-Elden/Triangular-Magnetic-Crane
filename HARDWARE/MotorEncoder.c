@@ -148,14 +148,14 @@ void TIM6_IRQHandler() {
 				if (fabs(1.0 * LCurrentPosition / 54000) < fabs(LTargetCircle / 2))
 					Speed_UP(Accel);
 				else
-					Speed_DOWN(Accel - 200);//这个幅度必须和加速幅度一样
+					Speed_DOWN(Accel + 200);//这个幅度必须和加速幅度一样
 			} else {
 				Speed_UP(Accel);
 				if (MotorState == VelCir)
 					Speed_DOWN(Dccel);
 			}
 		}
-		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis全局变量往后修改
+		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis 为当前行进的距离
 		if (Sensor_open)
 			Getdis();
 		switch (MotorState) {
@@ -494,7 +494,7 @@ int Velocity_Restrict(int PWM_P, int TargetVelocity) {
 
 /**************************************************************************
 函数功能：转向控制  巡线
-入口参数：CCD提取的中线 Z轴陀螺仪
+入口参数：Z轴陀螺仪
 返回  值：转向控制PWM
 作    者：平衡小车之家
 **************************************************************************/

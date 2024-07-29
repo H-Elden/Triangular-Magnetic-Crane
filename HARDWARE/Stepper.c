@@ -179,7 +179,7 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 	return 2;														// 错误
 	
 #else
-	if(timer < close_time[addr] + 5)			//相当于多加500ms 	
+	if(timer < close_time[addr] + 2)			//相当于多加200ms 	
 		return 1;
 	printf("%d Stepper Stop\r\n",addr);
 	return 0;

@@ -12,21 +12,8 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	puts("-----BEGIN-----");
-//	Stepper_Turn(4, UP4, C2);
-//	while(Stepper_GetStatus(4));
-//	Stepper_Turn(4, DOWN4, C2);
-//	while(Stepper_GetStatus(4));
-//	MagnetON(2);
-//	delay_ms(50);
-//	weight[1] = 1;
-//	Stepper_Turn(4, UP4, C2);
-//	while(Stepper_GetStatus(4));
-//	weight[1] = 0;
-//	Stepper_Turn(4, DOWN4, C2);
-//	while(Stepper_GetStatus(4));
-//	MagnetOFF(2);
-//	delay_ms(50);
 
+	
 	u32 Start = timer;							//记下程序开始的时间
 	Stepper_Turn(3, UP3, C1);
 	Stepper_Turn(4, UP4, C1);
@@ -36,6 +23,7 @@ int main() {
 	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
 	
 	while (1) {
+
 		//B线：识别
 		if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
 			only[0] = 1;
@@ -48,10 +36,8 @@ int main() {
 		}
 		//E线：吸取
 		else if (only[2] == 0 && way == 0 && Run_Dis >= PointDis[2][0] && Run_Dis <= PointDis[2][1]) {
-			eff = 1;
 			only[2] = 1;
 			ELine0();
-			eff = 3;
 		}
 		//H线：放置
 		else if (only[3] == 0 && Run_Dis >= PointDis[3][0]) {

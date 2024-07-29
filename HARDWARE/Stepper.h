@@ -16,7 +16,7 @@
 #define SVEL_C 400						//设置垂直步进的速度
 #define SACC_C 240						//设置垂直步进的加速度
 #define SVEL_S 400						//设置水平步进的速度
-#define SACC_S 230						//设置水平步进的加速度
+#define SACC_S 220						//设置水平步进的加速度
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -44,18 +44,19 @@
 
 /* 基于
 速度SVEL_S = 400 SVEL_C = 400
-加速度SACC_S = 230 SACC_C = 240
+加速度SACC_S = 220 SACC_C = 240
 的测量结果如下 */
-#define TIME_S1		11
-#define TIME_S2		13
-#define TIME_S2_1	6
+#define TIME_S1		13
+#define TIME_S2		15
+#define TIME_S2_1	7
 #define TIME_C1		5
 #define TIME_C2		7
 #define TIME_Z0		5
+
 //带负载垂直上升
-#define TIME_C1_W	13
-#define TIME_C2_W	22
-#define TIME_Z0_W	17
+#define TIME_C1_W	7
+#define TIME_C2_W	13
+#define TIME_Z0_W	9
 
 extern u8 weight[3];			//抓手是否带负载
 
