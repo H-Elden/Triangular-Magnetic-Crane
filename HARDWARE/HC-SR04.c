@@ -51,7 +51,7 @@ void HCSR04_Init(void) {
 
 	// 配置Echo0_Pin至Echo4_Pin为输入模式
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;						//下拉输入
-	for(u8 i = 0;i < 3;i++){
+	for (u8 i = 0; i < 3; i++) {
 		GPIO_InitStruct.GPIO_Pin = Echo_Pin[i];
 		GPIO_Init(Echo_GPIO[i], &GPIO_InitStruct);
 	}
@@ -59,7 +59,7 @@ void HCSR04_Init(void) {
 	// 配置Trig1_Pin至Trig4_Pin为输出模式
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;					//推挽输出
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	for(u8 i = 0;i < 3;i++){
+	for (u8 i = 0; i < 3; i++) {
 		GPIO_InitStruct.GPIO_Pin = Trig_Pin[i];
 		GPIO_Init(Trig_GPIO[i], &GPIO_InitStruct);
 		Trig_GPIO[i] -> BRR = Trig_Pin[i];									// 设置初始输出电平为低电平
@@ -138,23 +138,19 @@ void EXTI_Sensor(uint8_t i) {
 			dist[i] = 0;
 		else
 			dist[i] = 0.0001 * cnt * 340 / 2 ;	//单位cm
-		printf("dis %d = %.3f\r\n", i, dist[i]);
 
 		//近15次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)不少于3次 就 停车
 		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3) {
 			//关闭传感器 + 置零测距值
 			//SensorOFF(i);
 			Sensor_open = 0;
-			printf("%d dis = %.2f\n", i, dist[i]);
 			if (i & 1) {
 				SensorON(2);
 				LED_GREEN = 0;		//左找到开绿灯
-				puts("Green ON");
 			} else {
-				if(i)
-				SensorON(1);
+				if (i)
+					SensorON(1);
 				LED_RED = 0;			//右找到开红灯
-				puts("Red ON");
 			}
 			dist[i] = 0;
 			if (isStore == 'B') {
@@ -164,25 +160,20 @@ void EXTI_Sensor(uint8_t i) {
 				if (!obj[0])
 					way = 1;				//中间砝码在C抓
 			} else if (isStore == 'E') {
-					obj[i + 2] = 1;
-			}
-			else if(isStore == 'F') {
+				obj[i + 2] = 1;
+			} else if (isStore == 'F') {
 				if (i)
 					obj[i + 5] = 1;
 				else {
 					obj[5] = 1;
 					return;					//防止因为测到5而停车
-				}					
+				}
 			}
-			
 			//走一段距离 + 停车
 			if (isStop) {
 				Con_Stop(fabs(Con_Dis - Run_Dis));						//继续走多少mm停车
-				printf("Con_Stop = %.0f\n", fabs(Con_Dis - Run_Dis));
-				printf("Sensor_open = %d\n", Sensor_open);
 				isStop = 0;
 			}
-
 		}
 	}
 }
@@ -199,14 +190,14 @@ uint8_t countEffect(uint8_t i, uint8_t input) {
 	static uint8_t pos[3]; 						// 当前输入的位置
 	// 每 CYCLES 个输入循环一次
 	if (pos[i] == CYCLES)		pos[i] = 0;
-	
+
 	ones[i] &= ~(1 << pos[i]);				//移除最旧的输入的位
 	if (input)												//如果输入是1
 		ones[i] |= (1 << pos[i]);				//把第shift位置1
-	
+
 	// 移动到下一个位置
 	pos[i]++;
-	
+
 	//编译器内置函数，返回64位长整型的二进制中1的个数
 	return __builtin_popcountll(ones[i]);
 }

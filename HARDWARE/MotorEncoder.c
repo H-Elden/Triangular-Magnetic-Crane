@@ -35,7 +35,6 @@ MotorState_t MotorState = Stop;		//默认停车
   * @retval 无
   */
 void Motor_Run(uint8_t dir, uint16_t vel) {
-	puts("Motor_Run");
 	Velocity_flag = 1;
 	Fudu_flag = 1;
 	MotorState = Velocity_Xunji;
@@ -83,7 +82,6 @@ void Con_Stop(float dis) {
 	* @note		这段距离包含加减速的过程，在dis内准确停车
   */
 void Run(uint8_t dir, float dis, uint16_t vel) {
-	printf("Run %.1f mm\r\n", dis);
 	Run_flag = 1;
 	switch (dir) {
 		case 0: {
@@ -104,8 +102,8 @@ void Speed_UP(float accel) {
 	LTargetVelocity = accel * LCurrentPosition_V / 54000 + LStartMinV;
 	RTargetVelocity = - LTargetVelocity;
 	if (abs(LTargetVelocity) >= abs(LTargetVelocity_f)) {
-        if(Run_flag)
-            MVEL_flag = 1;
+		if (Run_flag)
+			MVEL_flag = 1;
 		LTargetVelocity = LTargetVelocity_f;
 		RTargetVelocity = RTargetVelocity_f;
 	}
@@ -117,8 +115,8 @@ void Speed_DOWN(float dccel) {
 		Velocity_flag = 0;
 		LCurrentPosition_V = 0;
 	}
-    if(Run_flag && MVEL_flag)
-        dccel -= 700;
+	if (Run_flag && MVEL_flag)
+		dccel -= 700;
 	if (LTargetVelocity_f > 0) {
 		LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
 	} else {
@@ -172,7 +170,7 @@ void TIM6_IRQHandler() {
 
 				Run_flag = 0;
 				Fudu_flag = 0;
-                MVEL_flag = 0;
+				MVEL_flag = 0;
 				LCurrentPosition_V = 0;
 
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
@@ -183,7 +181,6 @@ void TIM6_IRQHandler() {
 			}
 			case Velocity_Xunji: {
 				Gyro_read();
-//					printf("%d    %.3f\r\n", Turn(fAngle[2]), fAngle[2]);
 				LTargetVelocity = LTargetVelocity - Turn(fAngle[2]);
 				RTargetVelocity = RTargetVelocity - Turn(fAngle[2]);
 				LPWM = LVelocity_FeedbackControl(LTargetVelocity, LEncoder); 		//速度环闭环控制
@@ -201,7 +198,6 @@ void TIM6_IRQHandler() {
 
 				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) { //当编码器读数为0即为停车
 					MotorState = Stop;
-					puts("stopFlag");
 				}
 
 				LPWM_P = LPosition_FeedbackControl(LTargetCircle, LCurrentPosition); //位置闭环控制
