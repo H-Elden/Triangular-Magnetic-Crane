@@ -80,6 +80,8 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 	cmd[12] =  0x6B;                      // 校验字节
 	// 发送命令
 	usart3_SendCmd(cmd, 13);
+	u16 delay = 72 * 20;										// 软延时，延时2us
+	while(delay--);
 
 	//计算关闭电机的时间
 	if (addr == 1 || addr == 2) {
