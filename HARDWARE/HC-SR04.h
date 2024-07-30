@@ -28,7 +28,7 @@
 #include "led.h"
 #include "Process.h"
 
-#define CYCLES 10						//循环次数，即统计近多少次的超声波数据，范围[0,32)
+#define CYCLES 15						//循环次数，即统计近多少次的超声波数据，范围[0,32)
 
 extern uint8_t Sensor_open;
 extern uint32_t ones[3];

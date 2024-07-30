@@ -115,7 +115,6 @@ void CLine() {
 	SensorON(1);
 	SensorON(2);
 	while (Run_Dis < PointDis[1][2]);
-//	delay_ms(100);
 	Sensor_open = 0;							//关闭所有传感器
 	dist[1] = dist[2] = 0;
 	LED_GREEN = 1;								//关灯重置
@@ -214,7 +213,6 @@ void ELine0() {
 	puts("E0 ON 1 2");
 	//阻塞等待直到 已经停车 或者 已经走过E线
 	while (Run_Dis < PointDis[2][2]);
-//	delay_ms(100);
 	if (!obj[3] && !obj[4])
 		Con_Stop(1575 - Run_Dis);
 	Sensor_open = 0;	//关闭所有传感器
@@ -224,10 +222,6 @@ void ELine0() {
 	dist[1] = dist[2] = 0;
 	isStore = 'F';				//存储砝码信息
 	puts("E0 ON 0");
-//	SetGoaldis(1, 25, 45);
-//	SetGoaldis(2, 25, 45);
-//	SensorON(1);
-//	SensorON(2);
 	SensorON(0);
 	
 
@@ -237,9 +231,6 @@ void ELine0() {
 		dist[1] = dist[2] = dist[0] = 0;
 		LED_RED = 1;
 		puts("E0 OFF 0");
-//		if(!obj[6] && !obj[3])		obj[3] = 1;				//矫正误测
-//		if(!obj[7] && !obj[4])		obj[4] = 1;				//矫正误测
-		
 		
 		if(!obj[3])	Stepper_Turn(1,WAI1,S1);
 		if(!obj[4])	Stepper_Turn(2,WAI2,S1);
@@ -251,7 +242,6 @@ void ELine0() {
 			Run(0, 187.5, MVEL);											//去F抓
 			while (MotorState != Stop);								//阻塞等待 车子停稳
 			Catch('F', !obj[3], obj[5], !obj[4]); 		//F抓取
-			//delay_ms(500);														//等步进抬升到一定高度，避免撞倒木桩
 			Motor_Run(0, MVEL);
 		}
 	} else {
@@ -263,7 +253,6 @@ void ELine0() {
 		puts("E0 OFF 0");
 		while (MotorState != Stop){putchar('-');}									//阻塞等待 车子停稳
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
-		//delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 		Motor_Run(0, MVEL);
 	}
 }
@@ -276,20 +265,6 @@ void ELine0() {
 void HLine() {
 	puts("");
 	puts("----- H Line -----");
-	/*
-	LED_GREEN = 1;		//开左传感器关绿灯
-	puts("H ON 1");
-	isStore = 0;			//不需要存储信息
-	isStop = 1;
-	Con_Dis = 2205 + 10;
-	SetGoaldis(1, 45, 55);
-	SensorON(1);
-	while (MotorState == Velocity_Xunji);
-	delay_ms(100);
-	Sensor_open = 0;
-	LED_GREEN = 1;		//关灯重置
-	puts("H Close 1");
-	*/
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 	puts("H STOP");
 	Run_Dis = 0;			//置零，回程距离为负
@@ -385,20 +360,6 @@ void Back() {
 void ILine() {
 	puts("");
 	puts("----- I Line -----");
-	/*
-	puts("I ON 3");
-	SetGoaldis(3, 40, 60);
-	SensorON(3);
-	isStore = 0;									//不存储砝码信息
-	isStop = 1;
-	Con_Dis = -3510 - 10;
-	while (MotorState == Velocity_Xunji);
-	delay_ms(200);
-	Sensor_open = 0;
-	LED_GREEN = 1;								//关灯重置
-	dist[3] = 0;
-	puts("I Close 3");
-	*/
 	while (MotorState != Stop);		//阻塞等待 车子停稳
 	puts("I STOP");
 	Place_Side();
