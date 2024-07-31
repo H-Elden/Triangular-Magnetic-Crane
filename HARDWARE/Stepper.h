@@ -13,8 +13,10 @@
 #define TIMER_ENABLE	1				//是否采用计时的方法判断步进停止
 #define TIMER_MEASURE	0				//是否要测量计时的数据
 
-#define SVEL 250							//设置步进的速度
-#define SACC 220							//设置步进的加速度
+#define SVEL_C 400						//设置垂直步进的速度
+#define SACC_C 240						//设置垂直步进的加速度
+#define SVEL_S 400						//设置水平步进的速度
+#define SACC_S 220						//设置水平步进的加速度
 
 #define CLOCKWISE 		1				//顺时针方向转动
 #define ANTICLOCKWISE 0				//逆时针方向转动
@@ -36,17 +38,28 @@
 #define S2 2080
 #define C1 500
 #define C2 1000
-#define Z0 600
+#define Z0 550
 
 #if TIMER_ENABLE
 
-/* 基于速度SVEL = 250 加速度SACC = 220 的测量结果如下 */
-#define TIME_S1		14
-#define TIME_S2		18
+/* 基于
+速度SVEL_S = 400 SVEL_C = 400
+加速度SACC_S = 220 SACC_C = 240
+的测量结果如下 */
+#define TIME_S1		13
+#define TIME_S2		15
 #define TIME_S2_1	7
-#define TIME_C1		7
-#define TIME_C2		11
-#define TIME_Z0		8
+#define TIME_C1		5
+#define TIME_C2		7
+#define TIME_Z0		5
+
+//带负载垂直上升
+#define TIME_C1_W	7
+#define TIME_C2_W	13
+#define TIME_Z0_W	9
+
+extern u8 weight[3];			//抓手是否带负载
+
 
 #endif	/* TIMER_ENABLE */
 
@@ -73,6 +86,7 @@ extern volatile uint32_t timer;
 #endif
 #if TIMER_MEASURE
 void Stepper_TimerINIT(void);
+void Stepper_TimerINIT2(void);
 #endif	/* TIMER_MEASURE */
 
 void Print_RxCmd(void);
@@ -80,7 +94,7 @@ void Stepper_StopNow(void);
 void Stepper_Turn(uint8_t addr, uint8_t dir, float angle);
 uint8_t Stepper_GetStatus(uint8_t addr);
 
-
+//配置步进电机驱动板
 void Stepper_GetCfg(uint8_t addr);
 void Stepper_SetCfg(uint8_t addr);
 

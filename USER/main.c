@@ -12,6 +12,7 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	puts("-----BEGIN-----");
+
 	
 	u32 Start = timer;							//记下程序开始的时间
 	Stepper_Turn(3, UP3, C1);
@@ -20,9 +21,9 @@ int main() {
 
 	delay_ms(500);
 	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
-
-	while (1) {
 	
+	while (1) {
+
 		//B线：识别
 		if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
 			only[0] = 1;
@@ -41,17 +42,18 @@ int main() {
 		//H线：放置
 		else if (only[3] == 0 && Run_Dis >= PointDis[3][0]) {
 			only[3] = 1;
+			Con_Stop(2205 + 5 - Run_Dis);
 			HLine();
 		}
 		//I线：放置
 		else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
 			only[4] = 1;
+			Con_Stop(Run_Dis + 3510 + 5);
 			ILine();
 			puts("-----END-----");
 			printf("总用时：\r\n\t%.1fs\r\n",(timer - Start)/10.0);
 		}
 		delay_ms(10);
-		
 	}
 }
 

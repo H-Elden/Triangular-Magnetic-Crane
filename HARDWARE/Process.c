@@ -36,7 +36,6 @@ void Init() {
 	Gyro_read();
 	ZhongZhi = fAngle[2];
 	printf("ZhongZhi = %.3f\r\n", ZhongZhi);
-	n_Fudu = 1;
 
 	PointDis_Init();						//点位距离初始化
 	TIM6_Init(); 								//10ms 读取一次编码器(即100Hz)，使用定时器6
@@ -67,8 +66,8 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	PointDis[3][0] = 670 + 1192.5 - 20;		//H线。木桩子提前测
-	PointDis[4][0] = -3300;								//I线
+	PointDis[3][0] = 670 + 1192.5 - 100;	//H线。木桩子提前测
+	PointDis[4][0] = -3100;								//I线
 
 	for (u8 i = 0; i < 3; i++) {
 		PointDis[i][1] = PointDis[i][0] + 30;					//截止线
@@ -115,10 +114,9 @@ void CLine() {
 	puts("C ON 1 2");
 	SensorON(1);
 	SensorON(2);
-	while (Sensor_open && Run_Dis < PointDis[1][2]);
+	while (Run_Dis < PointDis[1][2]);
 	Sensor_open = 0;							//关闭所有传感器
 	dist[1] = dist[2] = 0;
-	delay_ms(100);
 	LED_GREEN = 1;								//关灯重置
 	LED_RED = 1;									//关灯重置
 	puts("C OFF All");
@@ -127,8 +125,10 @@ void CLine() {
 		//先向外移动到S1
 		if (obj[1])		Stepper_Turn(1, WAI1, S1);
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
-		while (MotorState != Stop);	//阻塞等待 车子停稳
+		while (MotorState != Stop);				//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
+		if(obj[1] && obj[2])							
+			delay_ms(500);									//防止撞倒木桩
 		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
 			while(Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
@@ -162,9 +162,12 @@ void DPoint() {
 		puts("E1 OFF All");
 		dist[1] = dist[2] = 0;
 	}
+	delay_ms(500);
+	MagnetOFF(0);						//关闭电磁铁0
 	delay_ms(50);
-	MagnetOFF(0);										//关闭电磁铁0
-	delay_ms(50);
+#if TIMER_ENABLE
+	weight[5 - 3] = 0;							//步进5设置为不带负载
+#endif
 	Stepper_Turn(5, UP0, C1);				//步进0向上提举到一定高度
 	while (Stepper_GetStatus(5));		//等待步进电机向上移动完毕
 }
@@ -209,52 +212,47 @@ void ELine0() {
 	SensorON(2);
 	puts("E0 ON 1 2");
 	//阻塞等待直到 已经停车 或者 已经走过E线
-	while (MotorState == Velocity_Xunji && Run_Dis < PointDis[2][2]);
+	while (Run_Dis < PointDis[2][2]);
 	if (!obj[3] && !obj[4])
 		Con_Stop(1575 - Run_Dis);
-	delay_ms(100);
 	Sensor_open = 0;	//关闭所有传感器
 	LED_GREEN = 1;		//关灯重置
 	LED_RED = 1;			//关灯重置
 	puts("E0 OFF 1 2");
-	SensorON(0);
+	dist[1] = dist[2] = 0;
+	isStore = 'F';				//存储砝码信息
 	puts("E0 ON 0");
 	SensorON(0);
-//	delay_ms(100);
-	dist[1] = dist[2] = 0;
+	
 
 	if (obj[3] || obj[4]) {
 		while (MotorState != Stop);									//阻塞等待 车子停稳
-		SensorOFF(0);																//停车就关掉超声波0
+		Sensor_open = 0;														//停车就关掉超声波
+		dist[1] = dist[2] = dist[0] = 0;
 		LED_RED = 1;
 		puts("E0 OFF 0");
-		dist[0] = 0;
+		
 		if(!obj[3])	Stepper_Turn(1,WAI1,S1);
 		if(!obj[4])	Stepper_Turn(2,WAI2,S1);
 		Catch('E', obj[3], 0, obj[4]);							//E抓取
+		delay_ms(500);
 		if (obj[3] && obj[4]) {
 			Motor_Run(0, MVEL);
 		} else {
 			Run(0, 187.5, MVEL);											//去F抓
 			while (MotorState != Stop);								//阻塞等待 车子停稳
 			Catch('F', !obj[3], obj[5], !obj[4]); 		//F抓取
-			delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 			Motor_Run(0, MVEL);
 		}
 	} else {
 		Stepper_Turn(1, WAI1, S1);
 		Stepper_Turn(2, WAI2, S1);
 		while (Run_Dis <= 1387.5 - 100);						//防止机子太快误测到G点砝码
-		SensorOFF(0);																//如果没有测到也没有停车，会在这里关闭超声波0
-		dist[0] = 0;
+		Sensor_open = 0;														//如果没有测到也没有停车，会在这里关闭超声波
+		dist[1] = dist[2] = dist[0] = 0;
 		puts("E0 OFF 0");
-		u32 i = 0;
-		while (MotorState != Stop){									//阻塞等待 车子停稳
-			printf("%d\r\n",i++);			//看看是堵在循环里面还是循环外面
-		}
-		puts("back");
+		while (MotorState != Stop){putchar('-');}									//阻塞等待 车子停稳
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
-		delay_ms(800);														//等步进抬升到一定高度，避免撞倒木桩
 		Motor_Run(0, MVEL);
 	}
 }
@@ -267,18 +265,6 @@ void ELine0() {
 void HLine() {
 	puts("");
 	puts("----- H Line -----");
-	LED_GREEN = 1;		//开左传感器关绿灯
-	puts("H ON 1");
-	isStore = 0;			//不需要存储信息
-	isStop = 1;
-	Con_Dis = 2205;
-	SetGoaldis(1, 45, 55);
-	SensorON(1);
-	while (MotorState == Velocity_Xunji);
-	delay_ms(100);
-	Sensor_open = 0;
-	LED_GREEN = 1;		//关灯重置
-	puts("H Close 1");
 	while (MotorState != Stop);	//阻塞等待 车子停稳
 	puts("H STOP");
 	Run_Dis = 0;			//置零，回程距离为负
@@ -301,9 +287,9 @@ void Back() {
 		obj[3] ? Stepper_Turn(1, NEI1, S2) : Stepper_Turn(1, NEI1, S2 - S1);			//步进1向内到达正确位置
 		obj[4] ? Stepper_Turn(2, NEI2, S2) : Stepper_Turn(2, NEI2, S2 - S1);			//步进2向内到达正确位置
 		(obj[3] && obj[4]) ? Run(1, 817.5, MVEL) : Run(1, 630, MVEL);							//两个都有去E，否则去F
-		delay_ms(200);										//避免抓手下降挂到砝码
-		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
-		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
+		delay_ms(500);										//避免抓手下降挂到砝码
+		Stepper_Turn(3, DOWN3, C2 - 5);		//步进3向下预先放到抓取高度
+		Stepper_Turn(4, DOWN4, C2 - 5);		//步进4向下预先放到抓取高度
 		while (MotorState != Stop);
 		if (!obj[3] || !obj[4]) {					//先去F抓
 			Catch('F', !obj[3], 0, !obj[4]);
@@ -319,27 +305,31 @@ void Back() {
 	} else {
 		obj[1] ? Stepper_Turn(1, NEI1, S2 - S1) : Stepper_Turn(1, NEI1, S2);					//步进1向内到达正确位置
 		obj[2] ? Stepper_Turn(2, NEI2, S2 - S1) : Stepper_Turn(2, NEI2, S2);					//步进2向内到达正确位置
-		if(!obj[5])
+		if (!obj[5])
 			Run(1, 255, MVEL);							//去G抓
-		else if(obj[3] && obj[4])
+		else if (obj[3] && obj[4])
 			Run(1, 630, MVEL);							//去F抓
 		else
 			Run(1, 1005, MVEL);							//去D
-		delay_ms(200);										//避免抓手下降挂到砝码
-		Stepper_Turn(3, DOWN3, C2);				//步进3向下预先放到抓取高度
-		Stepper_Turn(4, DOWN4, C2);				//步进4向下预先放到抓取高度
-		while (MotorState != Stop);				//阻塞等待 车子停稳
+		delay_ms(500);										//避免抓手下降挂到砝码
+		Stepper_Turn(3, DOWN3, C2 - 5);		//步进3向下预先放到抓取高度
+		Stepper_Turn(4, DOWN4, C2 - 5);		//步进4向下预先放到抓取高度
+		while (MotorState != Stop){				//阻塞等待 车子停稳
+			printf("-");
+		}
 		if (!obj[5]) {
 			Catch('G', 0, 1, 0);						//在G抓取
 			Run(1, 750, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
-		}
-		else if (obj[3] && obj[4]) {
+		} else if (obj[3] && obj[4]) {
 			Catch('F', 0, 1, 0);						//在F抓取
+			delay_ms(500);									//防止撞倒木桩
 			Run(1, 375, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}
+		puts("before D");
 		DPoint();													//在D放置
+		puts("after D");
 		if (!obj[1] || !obj[2]) {					//先去Cy抓
 			Run(1, 187.5, MVEL);
 			while (MotorState != Stop);			//阻塞等待 车子停稳
@@ -370,19 +360,8 @@ void Back() {
 void ILine() {
 	puts("");
 	puts("----- I Line -----");
-	puts("I ON 3");
-	SetGoaldis(3, 40, 60);
-	SensorON(3);
-	isStore = 0;									//不存储砝码信息
-	isStop = 1;
-	Con_Dis = -3510;
-	while (MotorState == Velocity_Xunji);
-	delay_ms(200);
-	Sensor_open = 0;
-	LED_GREEN = 1;								//关灯重置
-	dist[3] = 0;
-	puts("I Close 3");
 	while (MotorState != Stop);		//阻塞等待 车子停稳
+	puts("I STOP");
 	Place_Side();
 }
 
@@ -431,6 +410,12 @@ void Catch(char Line, u8 odd, u8 mid, u8 even) {
 	if (mid)	MagnetON(0);											//打开电磁铁0
 	delay_ms(50);
 
+#if TIMER_ENABLE
+	if (odd)	weight[3 - 3] = 1;										//步进3设置为带负载
+	if (even)	weight[4 - 3] = 1;										//步进4设置为带负载
+	if (mid)	weight[5 - 3] = 1;										//步进5设置为带负载
+#endif
+
 	if (odd)	Stepper_Turn(3, UP3, C2);					//先上升
 	if (even)	Stepper_Turn(4, UP4, C2);					//先上升
 	if (mid)	Stepper_Turn(5, UP0, Z0);					//先上升
@@ -443,13 +428,15 @@ void Place_Side() {
 	puts("Place");
 	//等待步进电机移动完毕
 	while (Stepper_GetStatus(1) || Stepper_GetStatus(2) || Stepper_GetStatus(3) || Stepper_GetStatus(4));
-
+#if TIMER_ENABLE
+	weight[0] = weight[1] = 0;			//3、4号电机均设置为不带负载
+#endif
 	delay_ms(50);
 	MagnetOFF(1);										//关闭电磁铁1
 	MagnetOFF(2);										//关闭电磁铁2
 	delay_ms(50);
 
-	Stepper_Turn(3, UP3, C1);				//步进3向上提举，脱离砝码
-	Stepper_Turn(4, UP4, C1);				//步进4向上提举，脱离砝码
+	Stepper_Turn(3, UP3, C1 - 5);		//步进3向上提举，脱离砝码
+	Stepper_Turn(4, UP4, C1 - 5);		//步进4向上提举，脱离砝码
 	while (Stepper_GetStatus(3) || Stepper_GetStatus(4));		//等待步进电机向上移动完毕
 }
