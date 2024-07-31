@@ -378,6 +378,7 @@ void Catch(char Line, u8 odd, u8 mid, u8 even) {
 }
 
 void Place_Side() {
+	delay_ms(300);									//防止抓手晃动
 	//等待步进电机移动完毕
 	while (Stepper_GetStatus(1) || Stepper_GetStatus(2) || Stepper_GetStatus(3) || Stepper_GetStatus(4));
 	weight[0] = weight[1] = 0;			//3、4号电机均设置为不带负载
