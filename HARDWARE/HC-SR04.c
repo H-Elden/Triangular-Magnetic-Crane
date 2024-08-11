@@ -138,21 +138,17 @@ void EXTI_Sensor(uint8_t i) {
 			dist[i] = 0;
 		else
 			dist[i] = 0.0001 * cnt * 340 / 2 ;	//单位cm
-		printf("dis %d = %.3f\r\n", i, dist[i]);
+		//printf("dis %d = %.3f\r\n", i, dist[i]);
 
 		//近15次测距中有效值(即满足dis在Goaldis_min和Goaldis_max之间)不少于3次 就 停车
 		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3) {
 			//关闭传感器 + 置零测距值
-			//SensorOFF(i);
-			Sensor_open = 0;
+			SensorOFF(i);
 			printf("%d dis = %.2f\n", i, dist[i]);
 			if (i & 1) {
-				SensorON(2);
 				LED_GREEN = 0;		//左找到开绿灯
 				puts("Green ON");
 			} else {
-				if(i)
-				SensorON(1);
 				LED_RED = 0;			//右找到开红灯
 				puts("Red ON");
 			}

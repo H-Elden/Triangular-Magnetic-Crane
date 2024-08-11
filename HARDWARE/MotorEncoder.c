@@ -42,14 +42,14 @@ void Motor_Run(uint8_t dir, uint16_t vel) {
 	switch (dir) {
 		case 0: {
 			LTargetVelocity_f = -vel;
-			LStartMinV = -vel / 4;
+			LStartMinV = -400;
 			RTargetVelocity_f = -LTargetVelocity_f;
 			RStartMinV = -LStartMinV;
 			break;
 		}
 		case 1: {
 			LTargetVelocity_f = vel;
-			LStartMinV = vel / 4;
+			LStartMinV = 400;
 			RTargetVelocity_f = -LTargetVelocity_f;
 			RStartMinV = -LStartMinV;
 			break;

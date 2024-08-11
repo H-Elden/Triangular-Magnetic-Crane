@@ -115,7 +115,9 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 
 	// 发送命令
 	usart3_SendCmd(cmd, 13);
-	puts("Stepper Turn");
+	u32 delay = 72 * 20;
+	while(delay--);											//软延时，20us
+//	puts("Stepper Turn");
 //	while (rxFrameFlag == false);
 //	rxFrameFlag = false;										// 清除接收标志
 //	while(!rxCmd[1]){
@@ -149,6 +151,41 @@ void Stepper_Turn(uint8_t addr, uint8_t dir, float angle) {
 #endif
 }
 
+#if TIMER_MEASURE
+/**
+  * @brief    带负载下降，仅会在测量时间时用到此函数
+  * @param    addr：电机地址
+  * @retval   地址 + 功能码 + 命令状态 + 校验字节
+  */
+void Stepper_Down(uint8_t addr, float angle) {
+	uint8_t cmd[13] = {0};
+	//脉冲数 = 角度 / 步进角（1.8） * 细分数（16）
+	uint32_t clk = angle / 1.8 * 16;
+	uint8_t dir = addr == 3 ? DOWN3 : DOWN4;		//4电机和5电机方向一致
+	uint16_t vel = 100;
+	uint8_t acc = 100;
+	// 装载命令
+	cmd[0]  =  addr;                      // 地址
+	cmd[1]  =  0xFD;                      // 功能码
+	cmd[2]  =  dir;                       // 方向
+	cmd[3]  =  (uint8_t)(vel >> 8);       // 速度(RPM)高8位字节
+	cmd[4]  =  (uint8_t)(vel >> 0);       // 速度(RPM)低8位字节
+	cmd[5]  =  acc;                       // 加速度，注意：0是直接启动
+	cmd[6]  =  (uint8_t)(clk >> 24);      // 脉冲数(bit24 - bit31)
+	cmd[7]  =  (uint8_t)(clk >> 16);      // 脉冲数(bit16 - bit23)
+	cmd[8]  =  (uint8_t)(clk >> 8);       // 脉冲数(bit8  - bit15)
+	cmd[9]  =  (uint8_t)(clk >> 0);       // 脉冲数(bit0  - bit7 )
+	cmd[10] =  false;                     // 相位/绝对标志，false为相对运动，true为绝对值运动
+	cmd[11] =  false;                     // 多机同步运动标志，false为不启用，true为启用
+	cmd[12] =  0x6B;                      // 校验字节
+
+	// 发送命令
+	usart3_SendCmd(cmd, 13);
+	while (rxFrameFlag == false);
+	rxFrameFlag = false;									// 清除接收标志
+}
+#endif	/* TIMER_MEASURE */
+
 /**
   * @brief    读取电机状态标志位
   * @param    addr：电机地址
@@ -163,6 +200,7 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 	cmd[1]  =  0x3A;                      // 功能码
 	cmd[2]  =  0x6B;                      // 校验字节
 
+	rxFrameFlag = false;									// 清除接收标志
 	// 发送命令
 	usart3_SendCmd(cmd, 3);
 
@@ -193,7 +231,7 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
   * @retval   无
 	* @note			使用说明：修改stepper.h的宏定义，1 1
 						在主函数while(1)循环前面调用此函数，机器所有抓手摆放
-						至初始位置，打开串口等待输出测量结果。
+						至初始位置，砝码放在罩子下面，打开串口等待输出测量结果。
   */
 void Stepper_TimerINIT(){
 	/* 先向上抬够高 */
@@ -202,7 +240,7 @@ void Stepper_TimerINIT(){
 	Stepper_Turn(5, UP0, Z0);
 	while(Stepper_GetStatus(3) || Stepper_GetStatus(4) || Stepper_GetStatus(5));
 	
-	u32 t[6] = {0},temp,i;
+	u32 t[9] = {0},temp,i;
 	/* TIME_S1 = t[0] */
 	for(i = 0;i < 2;i++){
 		temp = timer;
@@ -306,6 +344,50 @@ void Stepper_TimerINIT(){
 	/* 求平均数 */
 	for(i = 0;i<6;i++)
 		t[i] >>= 2;
+	
+	puts("开始测量带负载运行时间");
+	/* 测量带负载时步进电机的运行时间 */
+	/* TIME_C1_W */
+	MagnetON(1);
+	MagnetON(2);
+	temp = timer;
+	Stepper_Turn(3,UP3,C1);
+	Stepper_Turn(4,UP4,C1);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	t[6] += timer - temp;
+	printf("t[6] = %d\r\n",timer - temp);
+
+	Stepper_Down(3,C1);
+	Stepper_Down(4,C1);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	
+	/* TIME_C2_W */
+	temp = timer;
+	Stepper_Turn(3,UP3,C2);
+	Stepper_Turn(4,UP4,C2);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	t[7] += timer - temp;
+	printf("t[7] = %d\r\n",timer - temp);
+	
+	Stepper_Down(3,C2);
+	Stepper_Down(4,C2);
+	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	MagnetOFF(1);
+	MagnetOFF(2);
+	
+	/* TIME_Z0_W */
+	MagnetON(0);
+	temp = timer;
+	Stepper_Turn(5,UP0,Z0);
+	while(Stepper_GetStatus(5));															//阻塞等待停止	
+	t[8] += timer - temp;
+	printf("t[8] = %d\r\n",timer - temp);
+	
+	Stepper_Down(5,Z0);
+	while(Stepper_GetStatus(5));															//阻塞等待停止	
+	MagnetOFF(0);
+	
+	
 	/* 输出测量结果 */
 	printf("----- 测量完成！ -----\r\n");
 	printf("/* 基于\r\n速度SVEL_S = %d SVEL_C = %d\r\n加速度SACC_S = %d SACC_C = %d\r\n的测量结果如下 */\r\n", SVEL_S, SVEL_C, SACC_S, SACC_C);
@@ -315,34 +397,11 @@ void Stepper_TimerINIT(){
 	printf("#define TIME_C1\t\t%d\r\n",t[3]);
 	printf("#define TIME_C2\t\t%d\r\n",t[4]);
 	printf("#define TIME_Z0\t\t%d\r\n",t[5]);
-}
-
-//带负载上升时间测量
-void Stepper_TimerINIT2(){
-	u32 temp;
-	/* TIME_C1_W */
-	temp = timer;
-	Stepper_Turn(3,UP3,C1);
-	Stepper_Turn(4,UP4,C1);
-	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
-	printf("#define TIME_C1_W\t%d\r\n",timer - temp);
-
-	Stepper_Turn(3,DOWN3,C1);
-	Stepper_Turn(4,DOWN4,C1);
-	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
+	printf("/* 带负载的垂直上升 */\r\n");
+	printf("#define TIME_C1_W\t%d\r\n",t[6]);
+	printf("#define TIME_C2_W\t%d\r\n",t[7]);
+	printf("#define TIME_Z0_W\t%d\r\n",t[8]);
 	
-	/* TIME_C2_W */
-	temp = timer;
-	Stepper_Turn(3,UP3,C2);
-	Stepper_Turn(4,UP4,C2);
-	while(Stepper_GetStatus(3) || Stepper_GetStatus(4));			//阻塞等待停止	
-	printf("#define TIME_C2_W\t%d\r\n",timer - temp);
-	
-	/* TIME_Z0_W */
-	temp = timer;
-	Stepper_Turn(5,UP0,Z0);
-	while(Stepper_GetStatus(5));															//阻塞等待停止	
-	printf("#define TIME_Z0_W\t%d\r\n",timer - temp);
 }
 #endif	/* TIMER_MEASURE */
 

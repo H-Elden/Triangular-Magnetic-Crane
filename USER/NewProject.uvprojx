@@ -604,19 +604,14 @@
               <FilePath>..\HARDWARE\Process.c</FilePath>
             </File>
             <File>
-              <FileName>key.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\key.c</FilePath>
-            </File>
-            <File>
               <FileName>key.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\HARDWARE\key.h</FilePath>
             </File>
             <File>
-              <FileName>wit_c_sdk.c</FileName>
+              <FileName>key.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\wit_c_sdk.c</FilePath>
+              <FilePath>..\HARDWARE\key.c</FilePath>
             </File>
             <File>
               <FileName>gyroscope.c</FileName>
@@ -627,6 +622,11 @@
               <FileName>fifo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\fifo.c</FilePath>
+            </File>
+            <File>
+              <FileName>wit_c_sdk.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\wit_c_sdk.c</FilePath>
             </File>
             <File>
               <FileName>stepper.c</FileName>

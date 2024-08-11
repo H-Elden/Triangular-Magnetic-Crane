@@ -7,7 +7,7 @@
 
 #define PI 3.1415926
 #define Radius 32.3					//单位毫米
-#define MVEL 1600						//行进电机速度
+#define MVEL 2000						//行进电机速度
 #define Accel 1600.0
 #define Dccel 800.0
 
