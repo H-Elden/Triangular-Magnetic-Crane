@@ -66,8 +66,9 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	PointDis[3][0] = 670 + 1192.5 - 100;	//H线。木桩子提前测
-	PointDis[4][0] = -3100;								//I线
+	float adv = (MVEL - 400)/Dccel * 2 * PI * Radius;
+	PointDis[3][0] = 2205 - adv;					//H线。提前减速停车
+	PointDis[4][0] = -3510 + adv;					//I线。提前减速停车
 
 	for (u8 i = 0; i < 3; i++) {
 		PointDis[i][1] = PointDis[i][0] + 30;					//截止线
@@ -127,8 +128,8 @@ void CLine() {
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
 		while (MotorState != Stop);				//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
-//		if(obj[1] && obj[2])							
-//			delay_ms(500);									//防止撞倒木桩
+		if(obj[1] && obj[2])							
+			delay_ms(100);									//防止撞倒木桩
 		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
 			while(Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
@@ -224,7 +225,6 @@ void ELine0() {
 	puts("E0 ON 0");
 	SensorON(0);
 	
-
 	if (obj[3] || obj[4]) {
 		while (MotorState != Stop);									//阻塞等待 车子停稳
 		Sensor_open = 0;														//停车就关掉超声波
@@ -235,13 +235,14 @@ void ELine0() {
 		if(!obj[3])	Stepper_Turn(1,WAI1,S1);
 		if(!obj[4])	Stepper_Turn(2,WAI2,S1);
 		Catch('E', obj[3], 0, obj[4]);							//E抓取
-//		delay_ms(500);
 		if (obj[3] && obj[4]) {
+			delay_ms(600);														//防止撞倒高木桩
 			Motor_Run(0, MVEL);
 		} else {
 			Run(0, 187.5, MVEL);											//去F抓
 			while (MotorState != Stop);								//阻塞等待 车子停稳
 			Catch('F', !obj[3], obj[5], !obj[4]); 		//F抓取
+			delay_ms(800);														//防止左侧抓手撞倒高木桩
 			Motor_Run(0, MVEL);
 		}
 	} else {
@@ -251,8 +252,9 @@ void ELine0() {
 		Sensor_open = 0;														//如果没有测到也没有停车，会在这里关闭超声波
 		dist[1] = dist[2] = dist[0] = 0;
 		puts("E0 OFF 0");
-		while (MotorState != Stop){putchar('-');}									//阻塞等待 车子停稳
+		while (MotorState != Stop);									//阻塞等待 车子停稳
 		Catch('F', !obj[3], obj[5], !obj[4]);				//F抓取
+		delay_ms(800);															//防止左侧抓手撞倒高木桩
 		Motor_Run(0, MVEL);
 	}
 }
@@ -323,7 +325,7 @@ void Back() {
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		} else if (obj[3] && obj[4]) {
 			Catch('F', 0, 1, 0);						//在F抓取
-//			delay_ms(500);									//防止撞倒木桩
+			delay_ms(100);									//防止撞倒木桩
 			Run(1, 375, MVEL);							//去D
 			while (MotorState != Stop);			//阻塞等待 车子停稳
 		}

@@ -17,8 +17,8 @@
 #include "magnet.h"
 #endif	/* TIMER_MEASURE */
 
-#define SVEL_C 400						//设置垂直步进的速度
-#define SACC_C 240						//设置垂直步进的加速度
+#define SVEL_C 500						//设置垂直步进的速度
+#define SACC_C 245						//设置垂直步进的加速度
 #define SVEL_S 438						//设置水平步进的速度
 #define SACC_S 220						//设置水平步进的加速度
 
@@ -46,16 +46,17 @@
 
 #if TIMER_ENABLE
 
+
 /* 基于
-速度SVEL_S = 438 SVEL_C = 400
-加速度SACC_S = 220 SACC_C = 240
+速度SVEL_S = 438 SVEL_C = 500
+加速度SACC_S = 220 SACC_C = 245
 的测量结果如下 */
 #define TIME_S1		13
 #define TIME_S2		15
 #define TIME_S2_1	7
-#define TIME_C1		5
-#define TIME_C2		7
-#define TIME_Z0		5
+#define TIME_C1		4
+#define TIME_C2		5
+#define TIME_Z0		4
 /* 带负载的垂直上升 */
 #define TIME_C1_W	8
 #define TIME_C2_W	15

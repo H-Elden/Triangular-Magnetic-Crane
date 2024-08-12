@@ -12,7 +12,6 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	puts("-----BEGIN-----");
-	
 	u32 Start = timer;							//记下程序开始的时间
 	Stepper_Turn(3, UP3, C1);
 	Stepper_Turn(4, UP4, C1);
