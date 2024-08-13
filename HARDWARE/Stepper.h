@@ -41,11 +41,10 @@
 #define S1 1550
 #define S2 2080
 #define C1 500
-#define C2 (1000 - 30)
-#define Z0 (550 - 40)
+#define C2 980
+#define Z0 510
 
 #if TIMER_ENABLE
-
 
 /* 基于
 速度SVEL_S = 438 SVEL_C = 500
@@ -60,7 +59,7 @@
 /* 带负载的垂直上升 */
 #define TIME_C1_W	8
 #define TIME_C2_W	15
-#define TIME_Z0_W	11
+#define TIME_Z0_W	10
 
 extern u8 weight[3];			//抓手是否带负载
 

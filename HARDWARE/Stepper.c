@@ -191,6 +191,7 @@ void Stepper_Down(uint8_t addr, float angle) {
   * @param    addr：电机地址
   * @retval   1：正在旋转；0：旋转到位；2：错误
   */
+extern void delay_ms(u32 nms);
 uint8_t Stepper_GetStatus(uint8_t addr) {
 #if TIMER_MEASURE
 	uint8_t cmd[3] = {0};
@@ -206,7 +207,7 @@ uint8_t Stepper_GetStatus(uint8_t addr) {
 
 	while (rxFrameFlag == false);
 	rxFrameFlag = false;									// 清除接收标志
-
+	//Print_RxCmd();
 	if (rxCmd[1]) {
 		if (rxCmd[2] & 0x02) {
 			//printf("%d Stepper Stop\r\n", addr);
@@ -482,8 +483,8 @@ void Stepper_SetCfg(uint8_t addr) {
 	cmd[27]  =  0x08;                     // 修改堵转保护电流阈值为 1800Ma;
 	cmd[28]  =  0x03;                     // 修改堵转保护检测时间阈值为 1000ms;
 	cmd[29]  =  0xE8;                     // 修改堵转保护检测时间阈值为 1000ms;
-	cmd[30]  =  0x00;                     // 修改位置到达窗口为 0.3 度
-	cmd[31]  =  0x03;                     // 修改位置到达窗口为 0.3 度
+	cmd[30]  =  0x00;                     // 修改位置到达窗口为 3.0 度
+	cmd[31]  =  0x1E;                     // 修改位置到达窗口为 3.0 度
 	cmd[32]  =  0x6B;                     // 校验码
 	// 发送命令
 	usart3_SendCmd(cmd, 33);
