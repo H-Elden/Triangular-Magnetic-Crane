@@ -83,11 +83,7 @@ int fputc(int ch, FILE *file) {
 }
 
 void USART1_IRQHandler(void) { //USART1(串口1)中断
-	unsigned char ucTemp;
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) { //判断获取IT状态是否为0
-		ucTemp = USART_ReceiveData(USART1);//串口1接收数据并赋值给ucTemp
-		printf("\r\nucTemp = %c\r\n", ucTemp);
-		CopeCmdData(ucTemp);//把接收到的数据代入CopeCmdData函数中
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);//把UART1串口1中的数据清零
 	}
 	USART_ClearITPendingBit(USART2, USART_IT_ORE); //清零

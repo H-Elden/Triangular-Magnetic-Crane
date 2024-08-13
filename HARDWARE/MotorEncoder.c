@@ -35,7 +35,6 @@ MotorState_t MotorState = Stop;		//默认停车
   * @retval 无
   */
 void Motor_Run(uint8_t dir, uint16_t vel) {
-	puts("Motor_Run");
 	Velocity_flag = 1;
 	Fudu_flag = 1;
 	MotorState = Velocity_Xunji;
@@ -83,7 +82,6 @@ void Con_Stop(float dis) {
 	* @note		这段距离包含加减速的过程，在dis内准确停车
   */
 void Run(uint8_t dir, float dis, uint16_t vel) {
-	printf("Run %.1f mm\r\n", dis);
 	Run_flag = 1;
 	switch (dir) {
 		case 0: {
@@ -96,7 +94,6 @@ void Run(uint8_t dir, float dis, uint16_t vel) {
 			Con_Stop(dis);
 			break;
 		}
-
 	}
 }
 void Speed_UP(float accel) {
@@ -201,7 +198,6 @@ void TIM6_IRQHandler() {
 
 				if (fabs(LTargetCircle * 54000 - LCurrentPosition) < 5400 && LEncoder == 0) { //当编码器读数为0即为停车
 					MotorState = Stop;
-					puts("stopFlag");
 				}
 
 				LPWM_P = LPosition_FeedbackControl(LTargetCircle, LCurrentPosition); //位置闭环控制

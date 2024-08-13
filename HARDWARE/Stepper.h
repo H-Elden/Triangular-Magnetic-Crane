@@ -5,18 +5,6 @@
 
 #define		ABS(x)		((x) > 0 ? (x) : -(x))
 
-/*关于下面两个宏定义的设置：
-采用计时判断跑全程：	1 0
-采用串口判断跑全程：	0 1
-测量一次计时数据：		1 1
-*/
-#define TIMER_ENABLE	1				//是否采用计时的方法判断步进停止
-#define TIMER_MEASURE	0				//是否要测量计时的数据
-
-#if TIMER_MEASURE
-#include "magnet.h"
-#endif	/* TIMER_MEASURE */
-
 #define SVEL_C 500						//设置垂直步进的速度
 #define SACC_C 245						//设置垂直步进的加速度
 #define SVEL_S 438						//设置水平步进的速度
@@ -44,8 +32,6 @@
 #define C2 980
 #define Z0 510
 
-#if TIMER_ENABLE
-
 /* 基于
 速度SVEL_S = 438 SVEL_C = 500
 加速度SACC_S = 220 SACC_C = 245
@@ -64,8 +50,6 @@
 extern u8 weight[3];			//抓手是否带负载
 
 
-#endif	/* TIMER_ENABLE */
-
 typedef enum {
 	S_VER   = 0,			/* 读取固件版本和对应的硬件版本 */
 	S_RL    = 1,			/* 读取读取相电阻和相电感 */
@@ -83,22 +67,10 @@ typedef enum {
 	S_ORG   = 16,     /* 读取正在回零/回零失败状态标志位 */
 } SysParams_t;
 
-#if TIMER_ENABLE
 void TIM5_Init(void);
 extern volatile uint32_t timer;
-#endif
-#if TIMER_MEASURE
-void Stepper_Down(uint8_t addr, float angle);
-void Stepper_TimerINIT(void);
-#endif	/* TIMER_MEASURE */
 
-void Print_RxCmd(void);
-void Stepper_StopNow(void);
 void Stepper_Turn(uint8_t addr, uint8_t dir, float angle);
 uint8_t Stepper_GetStatus(uint8_t addr);
-
-//配置步进电机驱动板
-void Stepper_GetCfg(uint8_t addr);
-void Stepper_SetCfg(uint8_t addr);
 
 #endif

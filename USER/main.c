@@ -11,7 +11,6 @@ int main() {
 	LED_GREEN = 0;									//绿灯亮起，表示初始化完成，开始待机
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
-	puts("-----BEGIN-----");
 	u32 Start = timer;							//记下程序开始的时间
 
 	Stepper_Turn(3, UP3, C1);
@@ -50,7 +49,6 @@ int main() {
 			only[4] = 1;
 			Con_Stop(Run_Dis + 3510 + 5);
 			ILine();
-			puts("-----END-----");
 			printf("总用时：\r\n\t%.1fs\r\n",(timer - Start)/10.0);
 		}
 		delay_ms(10);

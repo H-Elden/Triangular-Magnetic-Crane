@@ -22,8 +22,6 @@
 
 extern float fAcc[3], fGyro[3], fAngle[3]; //定义float数组为下面计算输出做准备
 
-void CmdProcess(void);
-void CopeCmdData(unsigned char ucData);//UART1(串口1)接收数据并代入该函数进行处理
 void AutoScanSensor(void);
 void SensorUartSend(uint8_t *p_data, uint32_t uiSize);
 void SensorDataUpdata(uint32_t uiReg, uint32_t uiRegNum);

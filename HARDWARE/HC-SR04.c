@@ -144,13 +144,10 @@ void EXTI_Sensor(uint8_t i) {
 		if (countEffect(i, dist[i] > Goaldis_min[i] && dist[i] < Goaldis_max[i]) >= 3) {
 			//关闭传感器 + 置零测距值
 			SensorOFF(i);
-			printf("%d dis = %.2f\n", i, dist[i]);
 			if (i & 1) {
 				LED_GREEN = 0;		//左找到开绿灯
-				puts("Green ON");
 			} else {
 				LED_RED = 0;			//右找到开红灯
-				puts("Red ON");
 			}
 			dist[i] = 0;
 			if (isStore == 'B') {
@@ -174,8 +171,6 @@ void EXTI_Sensor(uint8_t i) {
 			//走一段距离 + 停车
 			if (isStop) {
 				Con_Stop(fabs(Con_Dis - Run_Dis));						//继续走多少mm停车
-				printf("Con_Stop = %.0f\n", fabs(Con_Dis - Run_Dis));
-				printf("Sensor_open = %d\n", Sensor_open);
 				isStop = 0;
 			}
 
