@@ -12,12 +12,25 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 	puts("-----BEGIN-----");
+		
 	u32 Start = timer;							//记下程序开始的时间
+//	MagnetON(0);
+//	MagnetON(1);
+//	MagnetON(2);
+//	Stepper_Turn(3, UP3, C2);
+//	Stepper_Turn(4, UP4, C2);
+//	Stepper_Turn(5, UP0, Z0);
+//	delay_ms(1200);
+//	MagnetOFF(0);
+//	MagnetOFF(1);
+//	MagnetOFF(2);
+	
 	Stepper_Turn(3, UP3, C1);
 	Stepper_Turn(4, UP4, C1);
 	Stepper_Turn(5, UP0, Z0);
 
 	delay_ms(50);
+	
 	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
 	
 	while (1) {
@@ -38,7 +51,7 @@ int main() {
 			ELine0();
 		}
 		//H线：放置
-		else if (only[3] == 0 && Run_Dis >= PointDis[3][0]) {
+		else if (only[3] == 0 && (way || obj[5]) && Run_Dis >= PointDis[3][0]) {
 			only[3] = 1;
 			Con_Stop(2205 + 5 - Run_Dis);
 			HLine();

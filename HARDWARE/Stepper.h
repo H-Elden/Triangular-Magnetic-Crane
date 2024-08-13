@@ -41,8 +41,8 @@
 #define S1 1550
 #define S2 2080
 #define C1 500
-#define C2 1000
-#define Z0 550
+#define C2 (1000 - 30)
+#define Z0 (550 - 40)
 
 #if TIMER_ENABLE
 

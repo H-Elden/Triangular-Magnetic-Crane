@@ -482,14 +482,12 @@ void Stepper_SetCfg(uint8_t addr) {
 	cmd[27]  =  0x08;                     // 修改堵转保护电流阈值为 1800Ma;
 	cmd[28]  =  0x03;                     // 修改堵转保护检测时间阈值为 1000ms;
 	cmd[29]  =  0xE8;                     // 修改堵转保护检测时间阈值为 1000ms;
-	cmd[30]  =  0x00;                     // 修改位置到达窗口为 3.0 度
-	cmd[31]  =  0x1E;                     // 修改位置到达窗口为 3.0 度
+	cmd[30]  =  0x00;                     // 修改位置到达窗口为 0.3 度
+	cmd[31]  =  0x03;                     // 修改位置到达窗口为 0.3 度
 	cmd[32]  =  0x6B;                     // 校验码
 	// 发送命令
 	usart3_SendCmd(cmd, 33);
-	puts("1");
 	while (rxFrameFlag == false);
-	puts("2");
 	Print_RxCmd();
 	rxFrameFlag = false;									// 清除接收标志
 }

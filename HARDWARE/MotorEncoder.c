@@ -118,7 +118,7 @@ void Speed_DOWN(float dccel) {
 		LCurrentPosition_V = 0;
 	}
     if(Run_flag && MVEL_flag)
-        dccel -= 700;
+        dccel -= 600;
 	if (LTargetVelocity_f > 0) {
 		LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
 	} else {
@@ -249,8 +249,8 @@ void MotorEncoder_Init_TIM4(void) { //左电机
 
 	NVIC_InitStruct.NVIC_IRQChannel = TIM4_IRQn;             //TIM4中断
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;             //使能IRQ通道
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;   //抢占优先级 1
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 3;          //响应优先级3
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;   //抢占优先级 1
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;          //响应优先级3
 	NVIC_Init(&NVIC_InitStruct);
 
 
@@ -290,8 +290,8 @@ void MotorEncoder_Init_TIM2(void) { //右电机
 
 	NVIC_InitStruct.NVIC_IRQChannel = TIM2_IRQn;  //定时器2中断
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;  //使能IRQ通道
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;//抢占优先级1
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 3;       //响应优先级3
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;//抢占优先级1
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;       //响应优先级3
 	NVIC_Init(&NVIC_InitStruct);
 
 
