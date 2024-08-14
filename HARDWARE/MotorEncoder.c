@@ -115,7 +115,7 @@ void Speed_DOWN(float dccel) {
 		LCurrentPosition_V = 0;
 	}
     if(Run_flag && MVEL_flag)
-        dccel -= 600;
+        dccel -= 1100;
 	if (LTargetVelocity_f > 0) {
 		LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
 	} else {

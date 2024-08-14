@@ -12,16 +12,23 @@ int main() {
 	while (KEY_Scan() != KEY_ON);		//阻塞等待按下按钮 KEY0
 	LED_GREEN = 1;									//绿灯熄灭，结束待机，开始运行程序
 
-	Stepper_Turn(3, UP3, C1);
-	Stepper_Turn(4, UP4, C1);
-	Stepper_Turn(5, UP0, Z0);
+	Motor_Run(1, MVEL);
+//	Stepper_Turn(3, UP3, C1);
+//	Stepper_Turn(4, UP4, C1);
+//	Stepper_Turn(5, UP0, Z0);
 
-	delay_ms(50);
-	
-	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
+//	delay_ms(50);
+//	
+//	Motor_Run(0, MVEL);							//以MVEL的速度正向行进
 
 	while (1) {
-
+		
+		if(only[4] == 0 && Run_Dis <= PointDis[4][0])
+		{
+			only[4] = 1;
+			Con_Stop(Run_Dis + 3510);
+		}
+/*
 		//B线：识别
 		if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
 			only[0] = 1;
@@ -53,7 +60,7 @@ int main() {
 			Stepper_Turn(2, NEI2, S2);
 		}
 		delay_ms(10);
-		
+		*/
 	}
 }
 
