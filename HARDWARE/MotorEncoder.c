@@ -18,6 +18,10 @@ float ZhongZhi; 		//单轴陀螺仪定义走直中值
 float Run_Dis;			//正数表示正向行进总距离(A点为0)，负数表示反向行进总距离(H点为0)。单位mm
 float Con_Dis;			//继续行走 Con_Dis 毫米的距离停车
 
+float Accel = 1200.0;
+float Dccel = 800.0;
+
+static u8 first_stop;
 MotorState_t MotorState = Stop;		//默认停车
 
 /*
@@ -64,13 +68,19 @@ void Motor_Run(uint8_t dir, uint16_t vel) {
 	* @note		这段距离包含减速的过程，在dis内准确停车
   */
 void Con_Stop(float dis) {
+	if(first_stop){
+		Dccel = 1400;
+		first_stop = 0;
+	}
+	else
+		Dccel = 800;
 	MotorState = VelCir;
 	if (LTargetVelocity_f < 0) {
-		LTargetCircle = -1.0 * dis / (2 * PI * Radius);
-		RTargetCircle = -LTargetCircle;
+		LTargetCircle = -1.0 * dis / (2 * PI * Radius_L);
+		RTargetCircle =  1.0 * dis / (2 * PI * Radius_R);
 	} else {
-		LTargetCircle = 1.0 * dis / (2 * PI * Radius);
-		RTargetCircle = -LTargetCircle;
+		LTargetCircle =  1.0 * dis / (2 * PI * Radius_L);
+		RTargetCircle = -1.0 * dis / (2 * PI * Radius_R);
 	}
 
 }
@@ -115,7 +125,7 @@ void Speed_DOWN(float dccel) {
 		LCurrentPosition_V = 0;
 	}
     if(Run_flag && MVEL_flag)
-        dccel -= 600;
+        dccel -= 300;
 	if (LTargetVelocity_f > 0) {
 		LTargetVelocity = Velocity_temp - fabs(dccel * LCurrentPosition_V / 54000);
 	} else {
@@ -152,7 +162,7 @@ void TIM6_IRQHandler() {
 					Speed_DOWN(Dccel);
 			}
 		}
-		Run_Dis += (1.0 * REncoder / 54000) * 2 * PI * Radius;  //Run_Dis 为当前行进的距离
+		Run_Dis += (-1.0 * LEncoder / 54000) * 2 * PI * Radius_L;  //Run_Dis 为当前行进的距离
 		if (Sensor_open)
 			Getdis();
 		switch (MotorState) {
@@ -446,7 +456,7 @@ int Velocity_Restrict(int PWM_P, int TargetVelocity) {
 **************************************************************************/
 int Turn(float YAW) { //转向控制
 	float Bias;
-	int Kp = 250, Kd = 1000;
+	int Kp = 500, Kd = 2000;
 	static float Turn, Last_Bias;
 	Bias = YAW - ZhongZhi;
 //    Integral_Bias+=Bias;
@@ -454,7 +464,7 @@ int Turn(float YAW) { //转向控制
 //    if(Integral_Bias<-970) Integral_Bias=-970; //积分限幅 防止到达目标位置后过冲
 	Turn = Kp * Bias + Kd * (Bias - Last_Bias);
 	Last_Bias = Bias;
-	if (Turn > 100) Turn = 50;
-	if (Turn < -100) Turn = -50;
+	if (Turn > 100) Turn = 100;
+	if (Turn < -100) Turn = -100;
 	return Turn;
 }

@@ -38,9 +38,9 @@ int main() {
 			ELine0();
 		}
 		//H线：放置
-		else if (only[3] == 0 && (way || obj[5]) && Run_Dis >= PointDis[3][0]) {
+		else if (only[3] == 0 && way && Run_Dis >= PointDis[3][0]) {
 			only[3] = 1;
-			Con_Stop(2205 + 15 - Run_Dis);
+			Con_Stop(2205 + 5 - Run_Dis);
 			HLine();
 		}
 		//I线：放置

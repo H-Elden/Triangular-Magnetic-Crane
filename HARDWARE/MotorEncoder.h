@@ -6,10 +6,12 @@
 #include "gyroscope.h"
 
 #define PI 3.1415926
-#define Radius 32.3					//单位毫米
+#define Radius_L 32.3					//单位毫米
+#define Radius_R 32.15					//单位毫米
 #define MVEL 2500						//行进电机速度
-#define Accel 1250.0
-#define Dccel 1200.0
+
+extern float Accel;
+extern float Dccel;
 
 typedef enum {
 	Stop,								//停止

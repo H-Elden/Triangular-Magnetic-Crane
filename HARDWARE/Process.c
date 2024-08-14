@@ -59,7 +59,7 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	float adv = (MVEL - 400) / Dccel * 2 * PI * Radius;
+	float adv = (MVEL - 400) / Dccel * 2 * PI * Radius_L;
 	PointDis[3][0] = 2205 - adv;					//H线。提前减速停车
 	PointDis[4][0] = -3510 + adv + 50;		//I线。提前减速停车
 
@@ -223,19 +223,18 @@ void ELine0() {
 		if (obj[5]) {
 			if (!obj[3] || !obj[4])
 				delay_ms(500);												//防止左侧抓手撞倒高木桩
-			Motor_Run(0, MVEL);
+			Run(0, 630, MVEL);											//去H
 		} else {
 			Run(0, 375, MVEL);											//去G抓
 			while (MotorState != Stop);							//阻塞等待 车子停稳
 		}
 	}
-
-	if (!obj[5]) {																//如果在G
+	if (!obj[5]) {															//如果在G
 		Catch('G', 0, 1, 0); 											//G抓取
 		Run(0, 255, MVEL);												//去H
-		while (MotorState != Stop);								//阻塞等待 车子停稳
-		HLine();
 	}
+	while (MotorState != Stop);									//阻塞等待 车子停稳
+	HLine();
 }
 
 /**
