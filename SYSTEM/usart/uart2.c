@@ -56,7 +56,6 @@ void USART2_IRQHandler(void)
 		ucTemp = USART_ReceiveData(USART2);//接收数据并赋值
 		WitSerialDataIn(ucTemp);//接收到的数据传入WitSerialDataIn函数中
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);//把接收到的数据清零
-
 	}
 }
 void Uart2Send(unsigned char *p_data, unsigned int uiSize)//串口2数据发送

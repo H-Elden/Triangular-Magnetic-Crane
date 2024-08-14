@@ -559,11 +559,6 @@
               <FilePath>..\SYSTEM\usart\uart2.c</FilePath>
             </File>
             <File>
-              <FileName>usart1.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\usart\usart1.c</FilePath>
-            </File>
-            <File>
               <FileName>usart3.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\usart3.c</FilePath>

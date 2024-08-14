@@ -13,7 +13,6 @@ void Init() {
 	delay_init(); 							//延迟函数初始化
 	LED_Init(); 								//LED灯初始化
 	KEY_GPIO_Init();						//按键KEY初始化
-	Usart1_Init(115200); 				//串口初始化
 	Usart2Init(9600);						//串口2初始化接传感器端
 	Usart3_Init();							//串口3初始化，接步进电机驱动板
 

@@ -7,7 +7,6 @@
 #include "sys.h"
 #include "wit_c_sdk.h"
 #include "delay.h"
-#include "usart1.h"
 #include "uart2.h"
 #include "usart3.h"
 #include "motorencoder.h"

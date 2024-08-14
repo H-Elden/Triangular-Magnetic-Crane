@@ -77,18 +77,18 @@ typedef int32_t (*WitI2cWrite)(uint8_t ucAddr, uint8_t ucReg, uint8_t *p_ucVal, 
     }
 */
 typedef int32_t (*WitI2cRead)(uint8_t ucAddr, uint8_t ucReg, uint8_t *p_ucVal, uint32_t uiLen);
-int32_t WitI2cFuncRegister(WitI2cWrite write_func, WitI2cRead read_func);
+//int32_t WitI2cFuncRegister(WitI2cWrite write_func, WitI2cRead read_func);
 
 /* can function */
 typedef void (*CanWrite)(uint8_t ucStdId, uint8_t *p_ucData, uint32_t uiLen);
-int32_t WitCanWriteRegister(CanWrite write_func);
+//int32_t WitCanWriteRegister(CanWrite write_func);
 
 /* Delayms function */
 typedef void (*DelaymsCb)(uint16_t ucMs);
 int32_t WitDelayMsRegister(DelaymsCb delayms_func);
 
 
-void WitCanDataIn(uint8_t ucData[8], uint8_t ucLen);
+//void WitCanDataIn(uint8_t ucData[8], uint8_t ucLen);
 
 
 typedef void (*RegUpdateCb)(uint32_t uiReg, uint32_t uiRegNum);
@@ -96,7 +96,7 @@ int32_t WitRegisterCallBack(RegUpdateCb update_func);
 int32_t WitWriteReg(uint32_t uiReg, uint16_t usData);
 int32_t WitReadReg(uint32_t uiReg, uint32_t uiReadNum);
 int32_t WitInit(uint32_t uiProtocol, uint8_t ucAddr);
-void WitDeInit(void);
+//void WitDeInit(void);
 
 
 
@@ -114,29 +114,29 @@ void WitDeInit(void);
   *
   ******************************************************************************
   */
-int32_t WitStartAccCali(void);
-int32_t WitStopAccCali(void);
-int32_t WitStartMagCali(void);
-int32_t WitStopMagCali(void);
+//int32_t WitStartAccCali(void);
+//int32_t WitStopAccCali(void);
+//int32_t WitStartMagCali(void);
+//int32_t WitStopMagCali(void);
 int32_t WitSetUartBaud(int32_t uiBaudIndex);
-int32_t WitSetBandwidth(int32_t uiBaudWidth);
+//int32_t WitSetBandwidth(int32_t uiBaudWidth);
 int32_t WitSetOutputRate(int32_t uiRate);
-int32_t WitSetContent(int32_t uiRsw);
-int32_t WitSetCanBaud(int32_t uiBaudIndex);
+//int32_t WitSetContent(int32_t uiRsw);
+//int32_t WitSetCanBaud(int32_t uiBaudIndex);
 
-int32_t WitStartANGLEZCali(void);
-int32_t WitStopANGLEZCali(void);
+//int32_t WitStartANGLEZCali(void);
+//int32_t WitStopANGLEZCali(void);
 
-int32_t WitStartREFANGLECali(void);
-int32_t WitStopREFANGLECali(void);
+//int32_t WitStartREFANGLECali(void);
+//int32_t WitStopREFANGLECali(void);
 
-int32_t WitStartALGRITHM6Cali(void);
-int32_t WitStopALGRITHM6Cali(void);
+//int32_t WitStartALGRITHM6Cali(void);
+//int32_t WitStopALGRITHM6Cali(void);
 
-int32_t WitStartRKMODECali(void);
-int32_t WitStopRKMODECali(void);
+//int32_t WitStartRKMODECali(void);
+//int32_t WitStopRKMODECali(void);
 
-int32_t WitStartIYAWCali(void);
+//int32_t WitStartIYAWCali(void);
 
 char CheckRange(short sTemp,short sMin,short sMax);
 

@@ -32,7 +32,7 @@ void Usart3_Init(void) {
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	// PB11 - USART3_RX
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;					/* 浮空输入 */
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;					/* 上拉输入 */
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* 初始化USART3 */
@@ -83,9 +83,8 @@ void USART3_IRQHandler(void) {
 
 		// 提取一帧数据命令
 		rxCount = fifo_queueLength();
-		for (i = 0; i < rxCount; i++) {
+		for (i = 0; i < rxCount; i++)
 			rxCmd[i] = fifo_deQueue();
-		}
 
 		// 一帧数据接收完成，置位帧标志位
 		rxFrameFlag = true;
@@ -99,10 +98,8 @@ void USART3_IRQHandler(void) {
 	*/
 void usart3_SendCmd(__IO uint8_t *cmd, uint8_t len) {
 	__IO uint8_t i = 0;
-
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < len; i++)
 		usart3_SendByte(cmd[i]);
-	}
 }
 
 /**
@@ -112,14 +109,11 @@ void usart3_SendCmd(__IO uint8_t *cmd, uint8_t len) {
 	*/
 void usart3_SendByte(uint8_t data) {
 	__IO uint16_t t0 = 0;
-
 	USART3->DR = data;
-
 	while (!(USART3->SR & USART_FLAG_TXE)) {
 		++t0;
-		if (t0 > 8000)	{
+		if (t0 > 8000)
 			return;
-		}
 	}
 }
 

@@ -4,7 +4,6 @@
 #define __PROCESS_H_
 
 #include "delay.h"
-#include "usart1.h"
 #include "led.h"
 #include "key.h"
 #include "motorencoder.h"
