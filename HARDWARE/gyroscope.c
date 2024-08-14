@@ -125,7 +125,5 @@ void AutoScanSensor(void)			//串口波特率检测
 			iRetry--;//变量自减
 		}while(iRetry);//while不为0就一直执行循环的内容
 	}
-	//printf("can not find sensor\r\n");//如果上面没有找到传感器就会执行下面这两句，如果找到就不会执行这两句
-	//printf("please check your connection\r\n");//
 }
 
