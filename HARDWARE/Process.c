@@ -21,7 +21,7 @@ void Init() {
 	WitRegisterCallBack(SensorDataUpdata);		//注册获取传感器数据回调函数   串口2接收数据调用SensorDataUpdata函数
 	WitDelayMsRegister(Delayms);							//注册延时回调函数
 	AutoScanSensor();//自动搜索传感器，如果线没有插对或者使用的串口工具不对会搜索不到传感器
-	WitSetOutputRate(RRATE_100HZ);	//回传速率设置为100赫兹
+	WitSetOutputRate(RRATE_10HZ);	//回传速率设置为10赫兹
 	WitSetUartBaud(WIT_BAUD_115200);//波特率设置为115200
 	delay_ms(1000);//延迟等待初始化完成
 	Gyro_read();
