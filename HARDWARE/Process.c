@@ -113,8 +113,8 @@ void CLine() {
 		if (obj[2])		Stepper_Turn(2, WAI2, S1);
 		while (MotorState != Stop);				//阻塞等待 车子停稳
 		Catch('C', obj[1], 1, obj[2]);		//中线一定会抓
-		if (obj[1] && obj[2])
-			delay_ms(100);									//防止撞倒木桩
+//		if (obj[1] && obj[2])
+//			delay_ms(100);									//防止撞倒木桩
 		if (obj[1] && obj[2]) {						//直接去D
 			Run(0, 375, MVEL);
 			while (Run_Dis < 1012.5);				//阻塞等待走到Cy时开启超声波，到D关
@@ -369,7 +369,7 @@ void Catch(char Line, u8 odd, u8 mid, u8 even) {
 	if (odd)	Stepper_Turn(3, UP3, C2);					//先上升
 	if (even)	Stepper_Turn(4, UP4, C2);					//先上升
 	if (mid)	Stepper_Turn(5, UP0, Z0);					//先上升
-	delay_ms(100);															//防止拖地
+	delay_ms(50);															//防止拖地
 	if (odd)	Stepper_Turn(1, WAI1, angle_wai);	//后向外
 	if (even)	Stepper_Turn(2, WAI2, angle_wai);	//后向外
 }
