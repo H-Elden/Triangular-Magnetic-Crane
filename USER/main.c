@@ -53,7 +53,7 @@ int main() {
 			Stepper_Turn(2, NEI2, S2);
 		}
 		delay_ms(10);
-		
+	
 	}
 }
 
