@@ -6,8 +6,8 @@
 #include "gyroscope.h"
 
 #define PI 3.1415926
-#define Radius_L 32.3					//单位毫米
-#define Radius_R 32.15					//单位毫米
+#define Radius_L 32.1 				//单位毫米
+#define Radius_R 31.95					//单位毫米
 #define MVEL 2500						//行进电机速度
 
 extern float Accel;
