@@ -15,7 +15,7 @@ static inline void MagnetON(u8 i)	{GPIO_SetBits(DIANCI_GPIO[i], DIANCI_Pin[i]);}
 static inline void MagnetOFF(u8 i) {		//¹Ø±Õµç´ÅÌúi
 	GPIO_ResetBits(DIANCI_GPIO[i], DIANCI_Pin[i]);
 	GPIO_SetBits(DIANCI_GPIO[i + 3], DIANCI_Pin[i + 3]);
-	delay_ms(20);
+	delay_ms(5);
 	GPIO_ResetBits(DIANCI_GPIO[i + 3], DIANCI_Pin[i + 3]);
 }
 
