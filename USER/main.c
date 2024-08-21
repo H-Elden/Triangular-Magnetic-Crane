@@ -46,11 +46,8 @@ int main() {
 		//Iœﬂ£∫∑≈÷√
 		else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
 			only[4] = 1;
-			Con_Stop(Run_Dis + 3510);
+			Con_Stop(Run_Dis + 3510 - 5);
 			ILine();
-			
-			Stepper_Turn(1, NEI1, S2);
-			Stepper_Turn(2, NEI2, S2);
 		}
 		delay_ms(10);
 		
