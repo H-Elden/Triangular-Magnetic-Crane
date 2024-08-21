@@ -464,7 +464,7 @@ int Turn(float YAW) { //转向控制
 //    if(Integral_Bias<-970) Integral_Bias=-970; //积分限幅 防止到达目标位置后过冲
 	Turn = Kp * Bias + Kd * (Bias - Last_Bias);
 	Last_Bias = Bias;
-	if (Turn > 100) Turn = 100;
-	if (Turn < -100) Turn = -100;
+	if (Turn > 50) Turn = 50;
+	if (Turn < -50) Turn = -50;
 	return Turn;
 }
