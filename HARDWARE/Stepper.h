@@ -29,7 +29,7 @@
 #define S1 1559
 #define S2 2065
 #define C1 500
-#define C2 970
+#define C2 960
 #define Z0 510
 
 /* »ùÓÚ
