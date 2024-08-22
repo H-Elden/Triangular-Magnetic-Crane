@@ -21,7 +21,7 @@ void Init() {
 	WitRegisterCallBack(SensorDataUpdata);		//注册获取传感器数据回调函数   串口2接收数据调用SensorDataUpdata函数
 	WitDelayMsRegister(Delayms);							//注册延时回调函数
 	AutoScanSensor();//自动搜索传感器，如果线没有插对或者使用的串口工具不对会搜索不到传感器
-	WitSetOutputRate(RRATE_10HZ);	//回传速率设置为100赫兹
+	WitSetOutputRate(RRATE_10HZ);		//回传速率设置为10赫兹
 	WitSetUartBaud(WIT_BAUD_115200);//波特率设置为115200
 	delay_ms(1000);//延迟等待初始化完成
 	Gyro_read();
@@ -60,7 +60,7 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	float adv = (MVEL - 400) / Dccel * 2 * PI * (Radius_L + Radius_R) / 2;
+	float adv = (MVEL - 400) / Dccel * 2 * PI * Radius;
 	PointDis[3][0] = 2205 - adv;					//H线。提前减速停车
 	PointDis[4][0] = -3510 + adv + 50;		//I线。提前减速停车
 
