@@ -162,7 +162,7 @@ void TIM6_IRQHandler() {
 					Speed_DOWN(Dccel);
 			}
 		}
-		Run_Dis += (-1.0 * LEncoder / 54000) * 2 * PI * Radius_L;  //Run_Dis 为当前行进的距离
+		Run_Dis += (-1.0 * LEncoder / 54000 * 2 * PI * Radius_L + 1.0 * REncoder / 54000 * 2 * PI * Radius_R) / 2;  //Run_Dis 为当前行进的距离
 		if (Sensor_open)
 			Getdis();
 		switch (MotorState) {

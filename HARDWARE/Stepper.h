@@ -26,8 +26,8 @@
 #define UP0 	ANTICLOCKWISE
 #define DOWN0 CLOCKWISE
 
-#define S1 1550
-#define S2 2080
+#define S1 1559
+#define S2 2065
 #define C1 500
 #define C2 970
 #define Z0 510

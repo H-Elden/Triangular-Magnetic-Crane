@@ -46,11 +46,11 @@ int main() {
 		//Iœﬂ£∫∑≈÷√
 		else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
 			only[4] = 1;
-			Con_Stop(Run_Dis + 3510 - 5);
+			Con_Stop(Run_Dis + 3510);
 			ILine();
 		}
 		delay_ms(10);
-	
+
 	}
 }
 

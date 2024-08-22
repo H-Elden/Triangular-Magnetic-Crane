@@ -47,6 +47,7 @@ void Init() {
 	while (rxFrameFlag == false);           // 如果没有上电会一直循环等待，红灯常亮
 	rxFrameFlag = false;                    // 清除接收标志
 	LED_RED = 1;                            // 红灯熄灭，说明步进上电了
+	
 }
 
 /**
@@ -59,7 +60,7 @@ void PointDis_Init() {
 	PointDis[0][0] = 0;             			//B线
 	PointDis[1][0] = 480;									//C线
 	PointDis[2][0] = 670 + 375;						//E线
-	float adv = (MVEL - 400) / Dccel * 2 * PI * Radius_L;
+	float adv = (MVEL - 400) / Dccel * 2 * PI * (Radius_L + Radius_R) / 2;
 	PointDis[3][0] = 2205 - adv;					//H线。提前减速停车
 	PointDis[4][0] = -3510 + adv + 50;		//I线。提前减速停车
 
