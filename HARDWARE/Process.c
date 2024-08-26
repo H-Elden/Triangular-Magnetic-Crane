@@ -23,6 +23,7 @@ void Init() {
 	AutoScanSensor();//自动搜索传感器，如果线没有插对或者使用的串口工具不对会搜索不到传感器
 	WitSetOutputRate(RRATE_10HZ);		//回传速率设置为10赫兹
 	WitSetUartBaud(WIT_BAUD_115200);//波特率设置为115200
+	WitStartIYAWCali();
 	delay_ms(1000);//延迟等待初始化完成
 	Gyro_read();
 	ZhongZhi = fAngle[2];
