@@ -19,7 +19,7 @@ uint16_t Tim7_begin[3];
 // 是否要在检测到目标后就停车
 uint8_t isStop;
 
-float   dist[3];
+float dist[3];
 
 /**
  * @brief  基本定时器7初始化函数
@@ -99,8 +99,7 @@ void Getdis() {
         if (Sensor_open & (1 << i)) {
             u16 delay = 72 * 20;                            // 软延时，约20us
             GPIO_SetBits(Trig_GPIO[i], Trig_Pin[i]);        // 设置为高电平
-            while (delay--)
-                ;        // 此处不要使用定时器，因为修改了CNT寄存器值，会影响到别的进程的延时功能
+            while (delay--);        // 此处不要使用定时器，因为修改了CNT寄存器值，会影响到别的进程的延时功能
             GPIO_ResetBits(Trig_GPIO[i], Trig_Pin[i]);        // 清除为低电平
         }
     }
@@ -152,8 +151,7 @@ void    EXTI_Sensor(uint8_t i) {
                 obj[0] = 1;
             } else if (isStore == 'C') {
                 obj[i] = 1;
-                if (!obj[0])
-                    way = 1;        // 中间砝码在C抓
+                if (!obj[0]) way = 1;        // 中间砝码在C抓
             } else if (isStore == 'E') {
                 obj[i + 2] = 1;
             } else if (isStore == 'F') {
@@ -184,8 +182,7 @@ uint32_t ones[3];        // 存储1的位数
 uint8_t  countEffect(uint8_t i, uint8_t input) {
     static uint8_t pos[3];        // 当前输入的位置
     // 每 CYCLES 个输入循环一次
-    if (pos[i] == CYCLES)
-        pos[i] = 0;
+    if (pos[i] == CYCLES) pos[i] = 0;
 
     ones[i] &= ~(1 << pos[i]);           // 移除最旧的输入的位
     if (input)                           // 如果输入是1

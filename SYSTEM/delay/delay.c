@@ -26,9 +26,7 @@ void delay_us(u32 nus) {
     SysTick->LOAD  = nus * fac_us;                   // 时间加载
     SysTick->VAL   = 0x00;                           // 清空计数器
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;        // 开始倒数
-    do {
-        temp = SysTick->CTRL;
-    } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
+    do { temp = SysTick->CTRL; } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;        // 关闭计数器
     SysTick->VAL   = 0X00;                            // 清空计数器
 }
@@ -48,18 +46,14 @@ void delay_ms(u16 nms) {
         SysTick->LOAD  = 1024 * fac_ms;                  // 时间加载，每次延时1024ms，循环tt次
         SysTick->VAL   = 0x00;                           // 清空计数器
         SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;        // 开始倒数
-        do {
-            temp = SysTick->CTRL;
-        } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
+        do { temp = SysTick->CTRL; } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
         SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;        // 关闭计数器
     }
 
     SysTick->LOAD  = ms * fac_ms;                    // 时间加载，延时nms
     SysTick->VAL   = 0x00;                           // 清空计数器
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;        // 开始倒数
-    do {
-        temp = SysTick->CTRL;
-    } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
+    do { temp = SysTick->CTRL; } while ((temp & 0x01) && !(temp & (1 << 16)));        // 等待时间到达
     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;        // 关闭计数器
     SysTick->VAL   = 0X00;                            // 清空计数器
 }

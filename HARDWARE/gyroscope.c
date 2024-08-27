@@ -70,29 +70,26 @@ void SensorDataUpdata(uint32_t uiReg, uint32_t uiRegNum)        // �����
     for (i = 0; i < uiRegNum; i++) {
         switch (uiReg)        // �ж�uiReg��������ʲô������ѡ���Ӧ�Ĳ���
         {
-            //            case AX:
-            //            case AY:
-        case AZ:
-            s_cDataUpdate |= ACC_UPDATE;        // s_cDataUpdate������ACC_UPDATE�����������Ľ���ٰѽ����ֵ��s_cDataUpdate����s_cDataUpdate=s_cDataUpdate|��ACC_UPDATE
-            break;
-            //            case GX:
-            //            case GY:
-        case GZ:
-            s_cDataUpdate |= GYRO_UPDATE;
-            break;
-            //            case HX:
-            //            case HY:
-        case HZ:
-            s_cDataUpdate |= MAG_UPDATE;
-            break;
-            //            case Roll:
-            //            case Pitch:
-        case Yaw:
-            s_cDataUpdate |= ANGLE_UPDATE;
-            break;
-        default:
-            s_cDataUpdate |= READ_UPDATE;
-            break;
+                //            case AX:
+                //            case AY:
+            case AZ:
+                s_cDataUpdate |=
+                    ACC_UPDATE;        // s_cDataUpdate������ACC_UPDATE�����������Ľ���ٰѽ����ֵ��s_cDataUpdate����s_cDataUpdate=s_cDataUpdate|��ACC_UPDATE
+                break;
+                //            case GX:
+                //            case GY:
+            case GZ:
+                s_cDataUpdate |= GYRO_UPDATE;
+                break;
+                //            case HX:
+                //            case HY:
+            case HZ:
+                s_cDataUpdate |= MAG_UPDATE;
+                break;
+                //            case Roll:
+                //            case Pitch:
+            case Yaw: s_cDataUpdate |= ANGLE_UPDATE; break;
+            default:  s_cDataUpdate |= READ_UPDATE; break;
         }
         uiReg++;
     }

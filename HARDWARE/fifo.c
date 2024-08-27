@@ -22,9 +22,7 @@ void fifo_enQueue(uint16_t data) {
 
     ++rxFIFO.ptrWrite;
 
-    if (rxFIFO.ptrWrite >= FIFO_SIZE) {
-        rxFIFO.ptrWrite = 0;
-    }
+    if (rxFIFO.ptrWrite >= FIFO_SIZE) { rxFIFO.ptrWrite = 0; }
 }
 
 /**
@@ -39,9 +37,7 @@ uint16_t fifo_deQueue(void) {
 
     ++rxFIFO.ptrRead;
 
-    if (rxFIFO.ptrRead >= FIFO_SIZE) {
-        rxFIFO.ptrRead = 0;
-    }
+    if (rxFIFO.ptrRead >= FIFO_SIZE) { rxFIFO.ptrRead = 0; }
 
     return element;
 }
@@ -52,9 +48,7 @@ uint16_t fifo_deQueue(void) {
  * @retval  нч
  */
 bool fifo_isEmpty(void) {
-    if (rxFIFO.ptrRead == rxFIFO.ptrWrite) {
-        return true;
-    }
+    if (rxFIFO.ptrRead == rxFIFO.ptrWrite) { return true; }
 
     return false;
 }

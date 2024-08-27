@@ -8,10 +8,9 @@
 int main() {
     u8 only[5] = {0};
     Init();
-    LED_GREEN = 0;        // 绿灯亮起，表示初始化完成，开始待机
-    while (KEY_Scan() != KEY_ON)
-        ;                 // 阻塞等待按下按钮 KEY0
-    LED_GREEN = 1;        // 绿灯熄灭，结束待机，开始运行程序
+    LED_GREEN = 0;                       // 绿灯亮起，表示初始化完成，开始待机
+    while (KEY_Scan() != KEY_ON);        // 阻塞等待按下按钮 KEY0
+    LED_GREEN = 1;                       // 绿灯熄灭，结束待机，开始运行程序
 
     Stepper_Turn(3, UP3, C1);
     Stepper_Turn(4, UP4, C1);
