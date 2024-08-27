@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE;..\HARDWARE\MPU6050</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -627,16 +627,6 @@
               <FileName>stepper.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\stepper.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>README</GroupName>
-          <Files>
-            <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\README\readme.txt</FilePath>
             </File>
           </Files>
         </Group>
