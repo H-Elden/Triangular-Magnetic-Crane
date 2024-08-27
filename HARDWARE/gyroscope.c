@@ -10,120 +10,114 @@
 
 USB-TTL                   STM32Core              		JY901s
 VCC          -----           VCC        ----        	 VCC
-TX           -----           RX1  (GPIOA_10)   
+TX           -----           RX1  (GPIOA_10)
 RX           -----           TX1  (GPIOA_9)
 GND          -----           GND    ----       			 GND
                              RX2  (GPIOA_3)  ----        TX
-							 TX2  (GPIOA_2)  ----        RX
+                             TX2  (GPIOA_2)  ----        RX
 ------------------------------------
 */
 
-
-float fAcc[3], fGyro[3], fAngle[3]; //¶¨ÒåfloatÊý×éÎªÏÂÃæ¼ÆËãÊä³ö×ö×¼±¸
-int i;
+float fAcc[3], fGyro[3], fAngle[3];        // ï¿½ï¿½ï¿½ï¿½floatï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½
+int   i;
 
 static volatile char s_cDataUpdate = 0, s_cCmd = 0xff;
-const uint32_t c_uiBaud[10] = {0, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600};
+const uint32_t       c_uiBaud[10] = {0, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600};
 
-void Gyro_read(void)
-{
-		if(s_cDataUpdate)//ÔÚ×¢²á»ñÈ¡´«¸ÐÆ÷Êý¾Ý»Øµ÷º¯Êý»á¶Ô±äÁ¿½øÐÐ¸³Öµ
-		{
-			for(i = 0; i < 3; i++)//forÑ­»·´ýi²»·ûºÏÌõ¼þÊ±Ìø³öforÑ­»·
-			{
-				fAcc[i] = sReg[AX+i] / 32768.0f * 16.0f;//Ëã·¨¹«Ê½
-				fGyro[i] = sReg[GX+i] / 32768.0f * 2000.0f;//Ëã·¨¹«Ê½
-				fAngle[i] = sReg[Roll+i] / 32768.0f * 180.0f;//Ëã·¨¹«Ê½
-			}
-			if(s_cDataUpdate & ACC_UPDATE)//ÅÐ¶Ï²»Îª0¾ÍÖ´ÐÐÏÂÃæµÄÓï¾ä
-			{
-//				printf("acc:%.3f %.3f %.3f\r\n", fAcc[0], fAcc[1], fAcc[2]);//´òÓ¡¶ÔÓ¦µÄÊý¾Ý³öÀ´
-				s_cDataUpdate &= ~ACC_UPDATE;//s_cDataUpdateºÍ~ACC_UPDATEÓëÔËËãºó¸³Öµ¸øs_cDataUpdate
-			}
-			if(s_cDataUpdate & GYRO_UPDATE)//ÒÔÏÂ¼¸ÐÐ´úÂëÍ¬ÉÏ
-			{
-//				printf("gyro:%.3f %.3f %.3f\r\n", fGyro[0], fGyro[1], fGyro[2]);
-				s_cDataUpdate &= ~GYRO_UPDATE;
-			}
-			if(s_cDataUpdate & ANGLE_UPDATE)
-			{
-//				printf("angle:%.3f\r\n",fAngle[2]);
-				s_cDataUpdate &= ~ANGLE_UPDATE;
-			}
-			if(s_cDataUpdate & MAG_UPDATE)
-			{
-				//printf("mag:%d %d %d\r\n", sReg[HX], sReg[HY], sReg[HZ]);
-				s_cDataUpdate &= ~MAG_UPDATE;
-			}
-		}
-}
-
-void SensorUartSend(uint8_t *p_data, uint32_t uiSize)//´«¸ÐÆ÷´®¿Ú·¢ËÍ
-{
-	Uart2Send(p_data, uiSize);//´®¿Ú2·¢ËÍ
-}
-
-void Delayms(uint16_t ucMs)//ÑÓÊ±³ÌÐò
-{
-	delay_ms(ucMs);
-}
-
-void SensorDataUpdata(uint32_t uiReg, uint32_t uiRegNum)//´«¸ÐÆ÷Êý¾ÝÉý¼¶
-{
-	int i;
-    for(i = 0; i < uiRegNum; i++)
+void Gyro_read(void) {
+    if (s_cDataUpdate)        // ï¿½ï¿½×¢ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½Öµ
     {
-        switch(uiReg)//ÅÐ¶ÏuiRegµÄÊý¾ÝÊÇÊ²Ã´À´½øÐÐÑ¡Ôñ¶ÔÓ¦µÄ²Ù×÷
+        for (i = 0; i < 3; i++)        // forÑ­ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½forÑ­ï¿½ï¿½
         {
-//            case AX:
-//            case AY:
-            case AZ:
-				s_cDataUpdate |= ACC_UPDATE;//s_cDataUpdate±äÁ¿ºÍACC_UPDATE±äÁ¿»òÔËËãºóµÄ½á¹ûÔÙ°Ñ½á¹û¸³Öµ¸øs_cDataUpdate£¬Èçs_cDataUpdate=s_cDataUpdate|ºÍACC_UPDATE
-            break;
-//            case GX:
-//            case GY:
-            case GZ:
-				s_cDataUpdate |= GYRO_UPDATE;
-            break;
-//            case HX:
-//            case HY:
-            case HZ:
-				s_cDataUpdate |= MAG_UPDATE;
-            break;
-//            case Roll:
-//            case Pitch:
-            case Yaw:
-				s_cDataUpdate |= ANGLE_UPDATE;
-            break;
-            default:
-				s_cDataUpdate |= READ_UPDATE;
-			break;
+            fAcc[i]   = sReg[AX + i] / 32768.0f * 16.0f;           // ï¿½ã·¨ï¿½ï¿½Ê½
+            fGyro[i]  = sReg[GX + i] / 32768.0f * 2000.0f;         // ï¿½ã·¨ï¿½ï¿½Ê½
+            fAngle[i] = sReg[Roll + i] / 32768.0f * 180.0f;        // ï¿½ã·¨ï¿½ï¿½Ê½
         }
-		uiReg++;
+        if (s_cDataUpdate & ACC_UPDATE)        // ï¿½Ð¶Ï²ï¿½Îª0ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        {
+            //				printf("acc:%.3f %.3f %.3f\r\n", fAcc[0], fAcc[1], fAcc[2]);//ï¿½ï¿½Ó¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½
+            s_cDataUpdate &= ~ACC_UPDATE;        // s_cDataUpdateï¿½ï¿½~ACC_UPDATEï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½s_cDataUpdate
+        }
+        if (s_cDataUpdate & GYRO_UPDATE)        // ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ð´ï¿½ï¿½ï¿½Í¬ï¿½ï¿½
+        {
+            //				printf("gyro:%.3f %.3f %.3f\r\n", fGyro[0], fGyro[1], fGyro[2]);
+            s_cDataUpdate &= ~GYRO_UPDATE;
+        }
+        if (s_cDataUpdate & ANGLE_UPDATE) {
+            //				printf("angle:%.3f\r\n",fAngle[2]);
+            s_cDataUpdate &= ~ANGLE_UPDATE;
+        }
+        if (s_cDataUpdate & MAG_UPDATE) {
+            // printf("mag:%d %d %d\r\n", sReg[HX], sReg[HY], sReg[HZ]);
+            s_cDataUpdate &= ~MAG_UPDATE;
+        }
     }
 }
 
-void AutoScanSensor(void)			//´®¿Ú²¨ÌØÂÊ¼ì²â
+void SensorUartSend(uint8_t *p_data, uint32_t uiSize)        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½
 {
-	int i, iRetry;
-	
-	for(i = 1; i < 10; i++)			//forÑ­»·´ýi²»·ûºÏÌõ¼þ»áÌø³öÑ­»·
-	{
-		Usart2Init(c_uiBaud[i]);//´®¿Ú2²¨ÌØÂÊ´ÓÐ¡µ½´ó²éÑ¯
-		iRetry = 2;
-		do//do-while()Ñ­»·Óï¾äÏÈÖ´ÐÐÔÙÅÐ¶Ï
-		{
-			s_cDataUpdate = 0;
-			WitReadReg(AX, 3);		//¸øº¯Êý½øÐÐµ¼ÈëÐÎ²Î
-			delay_ms(100);				//ÑÓÊ±100ms
-			if(s_cDataUpdate != 0)//ÅÐ¶Ïs_cDataUpdate²»µÈÓÚ0Èç¹ûÊÇ²»µÈÓÚ0¾ÍÖ´ÐÐÀ¨ºÅÀïÃæµÄÄÚÈÝ
-			{
-				//printf("%d baud find sensor\r\n\r\n", c_uiBaud[i]);//´òÓ¡ÕÒµ½´«¸ÐÆ÷ºÍ´òÓ¡¶ÔÓ¦µÄ²¨ÌØÂÊ
-				//ShowHelp();				//Ö´ÐÐº¯Êý´òÓ¡ÄÚÈÝ
-				return ;
-			}
-			iRetry--;//±äÁ¿×Ô¼õ
-		}while(iRetry);//while²»Îª0¾ÍÒ»Ö±Ö´ÐÐÑ­»·µÄÄÚÈÝ
-	}
+    Uart2Send(p_data, uiSize);        // ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½
 }
 
+void Delayms(uint16_t ucMs)        // ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+{
+    delay_ms(ucMs);
+}
+
+void SensorDataUpdata(uint32_t uiReg, uint32_t uiRegNum)        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+{
+    int i;
+    for (i = 0; i < uiRegNum; i++) {
+        switch (uiReg)        // ï¿½Ð¶ï¿½uiRegï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê²Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ó¦ï¿½Ä²ï¿½ï¿½ï¿½
+        {
+            //            case AX:
+            //            case AY:
+        case AZ:
+            s_cDataUpdate |= ACC_UPDATE;        // s_cDataUpdateï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ACC_UPDATEï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½Ù°Ñ½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½s_cDataUpdateï¿½ï¿½ï¿½ï¿½s_cDataUpdate=s_cDataUpdate|ï¿½ï¿½ACC_UPDATE
+            break;
+            //            case GX:
+            //            case GY:
+        case GZ:
+            s_cDataUpdate |= GYRO_UPDATE;
+            break;
+            //            case HX:
+            //            case HY:
+        case HZ:
+            s_cDataUpdate |= MAG_UPDATE;
+            break;
+            //            case Roll:
+            //            case Pitch:
+        case Yaw:
+            s_cDataUpdate |= ANGLE_UPDATE;
+            break;
+        default:
+            s_cDataUpdate |= READ_UPDATE;
+            break;
+        }
+        uiReg++;
+    }
+}
+
+void AutoScanSensor(void)        // ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
+{
+    int i, iRetry;
+
+    for (i = 1; i < 10; i++)        // forÑ­ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½
+    {
+        Usart2Init(c_uiBaud[i]);        // ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¯
+        iRetry = 2;
+        do        // do-while()Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+        {
+            s_cDataUpdate = 0;
+            WitReadReg(AX, 3);        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½Î²ï¿½
+            delay_ms(100);            // ï¿½ï¿½Ê±100ms
+            if (s_cDataUpdate != 0)        // ï¿½Ð¶ï¿½s_cDataUpdateï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            {
+                // printf("%d baud find sensor\r\n\r\n", c_uiBaud[i]);//ï¿½ï¿½Ó¡ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í´ï¿½Ó¡ï¿½ï¿½Ó¦ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½
+                // ShowHelp();				//Ö´ï¿½Ðºï¿½ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
+                return;
+            }
+            iRetry--;        // ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½
+        } while (iRetry);        // whileï¿½ï¿½Îª0ï¿½ï¿½Ò»Ö±Ö´ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    }
+}

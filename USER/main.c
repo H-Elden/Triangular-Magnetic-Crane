@@ -1,56 +1,55 @@
 #include "Process.h"
 
 /**
-  * @brief  Ö÷³ÌÐò³õÊ¼»¯
-  * @prarm  ÎÞ
-  * @retval int
-  */
+ * @brief  ä¸»ç¨‹åºåˆå§‹åŒ–
+ * @param  æ— 
+ * @retval int
+ */
 int main() {
-	u8 only[5] = {0};
-	Init();
-	LED_GREEN = 0;									//ÂÌµÆÁÁÆð£¬±íÊ¾³õÊ¼»¯Íê³É£¬¿ªÊ¼´ý»ú
-	while (KEY_Scan() != KEY_ON);		//×èÈûµÈ´ý°´ÏÂ°´Å¥ KEY0
-	LED_GREEN = 1;									//ÂÌµÆÏ¨Ãð£¬½áÊø´ý»ú£¬¿ªÊ¼ÔËÐÐ³ÌÐò
+    u8 only[5] = {0};
+    Init();
+    LED_GREEN = 0;        // ç»¿ç¯äº®èµ·ï¼Œè¡¨ç¤ºåˆå§‹åŒ–å®Œæˆï¼Œå¼€å§‹å¾…æœº
+    while (KEY_Scan() != KEY_ON)
+        ;                 // é˜»å¡žç­‰å¾…æŒ‰ä¸‹æŒ‰é’® KEY0
+    LED_GREEN = 1;        // ç»¿ç¯ç†„ç­ï¼Œç»“æŸå¾…æœºï¼Œå¼€å§‹è¿è¡Œç¨‹åº
 
-	Stepper_Turn(3, UP3, C1);
-	Stepper_Turn(4, UP4, C1);
-	Stepper_Turn(5, UP0, Z0);
+    Stepper_Turn(3, UP3, C1);
+    Stepper_Turn(4, UP4, C1);
+    Stepper_Turn(5, UP0, Z0);
 
-	delay_ms(50);
-	
-	Motor_Run(0, MVEL);							//ÒÔMVELµÄËÙ¶ÈÕýÏòÐÐ½ø
+    delay_ms(50);
 
-	while (1) {
+    Motor_Run(0, MVEL);        // ä»¥MVELçš„é€Ÿåº¦æ­£å‘è¡Œè¿›
 
-		//BÏß£ºÊ¶±ð
-		if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
-			only[0] = 1;
-			BLine();
-		}
-		//CÏß£ºÊ¶±ð + ×¥È¡»ò²»×¥È¡
-		else if (only[1] == 0 && Run_Dis >= PointDis[1][0] && Run_Dis <= PointDis[1][1]) {
-			only[1] = 1;
-			CLine();
-		}
-		//EÏß£ºÎüÈ¡
-		else if (only[2] == 0 && way == 0 && Run_Dis >= PointDis[2][0] && Run_Dis <= PointDis[2][1]) {
-			only[2] = 1;
-			ELine0();
-		}
-		//HÏß£º·ÅÖÃ
-		else if (only[3] == 0 && way && Run_Dis >= PointDis[3][0]) {
-			only[3] = 1;
-			Con_Stop(2205  - Run_Dis);
-			HLine();
-		}
-		//IÏß£º·ÅÖÃ
-		else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
-			only[4] = 1;
-			Con_Stop(Run_Dis + 3510 - 25 - 5);
-			ILine();
-		}
-		delay_ms(10);
+    while (1) {
 
-	}
+        // Bçº¿ï¼šè¯†åˆ«
+        if (only[0] == 0 && Run_Dis >= PointDis[0][0] && Run_Dis <= PointDis[0][1]) {
+            only[0] = 1;
+            BLine();
+        }
+        // Cçº¿ï¼šè¯†åˆ« + æŠ“å–æˆ–ä¸æŠ“å–
+        else if (only[1] == 0 && Run_Dis >= PointDis[1][0] && Run_Dis <= PointDis[1][1]) {
+            only[1] = 1;
+            CLine();
+        }
+        // Eçº¿ï¼šå¸å–
+        else if (only[2] == 0 && way == 0 && Run_Dis >= PointDis[2][0] && Run_Dis <= PointDis[2][1]) {
+            only[2] = 1;
+            ELine0();
+        }
+        // Hçº¿ï¼šæ”¾ç½®
+        else if (only[3] == 0 && way && Run_Dis >= PointDis[3][0]) {
+            only[3] = 1;
+            Con_Stop(2205 - Run_Dis);
+            HLine();
+        }
+        // Içº¿ï¼šæ”¾ç½®
+        else if (only[4] == 0 && Run_Dis <= PointDis[4][0]) {
+            only[4] = 1;
+            Con_Stop(Run_Dis + 3510 - 25 - 5);
+            ILine();
+        }
+        delay_ms(10);
+    }
 }
-
