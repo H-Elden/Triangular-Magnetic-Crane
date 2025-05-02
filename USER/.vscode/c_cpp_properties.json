@@ -3,16 +3,16 @@
         {
             "name": "NewProject",
             "includePath": [
-                "d:\\Code\\STM32\\Crane_New\\USER",
-                "d:\\Code\\STM32\\Crane_New\\CORE",
-                "d:\\Code\\STM32\\Crane_New\\STM32F10x_FWLib\\inc",
-                "d:\\Code\\STM32\\Crane_New\\SYSTEM\\delay",
-                "d:\\Code\\STM32\\Crane_New\\SYSTEM\\sys",
-                "d:\\Code\\STM32\\Crane_New\\SYSTEM\\usart",
-                "d:\\Code\\STM32\\Crane_New\\HARDWARE",
+                "e:\\Code\\STM32\\Crane_New\\USER",
+                "e:\\Code\\STM32\\Crane_New\\CORE",
+                "e:\\Code\\STM32\\Crane_New\\STM32F10x_FWLib\\inc",
+                "e:\\Code\\STM32\\Crane_New\\SYSTEM\\delay",
+                "e:\\Code\\STM32\\Crane_New\\SYSTEM\\sys",
+                "e:\\Code\\STM32\\Crane_New\\SYSTEM\\usart",
+                "e:\\Code\\STM32\\Crane_New\\HARDWARE",
                 "D:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include",
                 "D:\\Program Files\\Keil_v5\\ARM\\ARMCC\\include\\rw",
-                "d:\\Code\\STM32\\Crane_New\\STM32F10x_FWLib\\src"
+                "e:\\Code\\STM32\\Crane_New\\STM32F10x_FWLib\\src"
             ],
             "defines": [
                 "STM32F10X_HD",

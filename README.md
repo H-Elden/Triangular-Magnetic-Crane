@@ -24,7 +24,7 @@
 
 # 国赛海报
 
-<img src="./README.assets/武汉理工大学-三角式磁吸起重机.jpg" alt="Calculator Screenshot" width="600px" />
+<img src="./README.assets/武汉理工大学-三角式磁吸起重机_MOSAIC.jpg" alt="Calculator Screenshot" width="600px" />
 
 # 特色
 
